@@ -2,7 +2,7 @@ import os.path
 
 from common.common import download_input_if_not_exists, post_answer, capture, capture_all, read_input_lines
 
-download_input_if_not_exists(2023)
+download_input_if_not_exists(2024)
 
 def part1(lines):
     return 0
@@ -23,5 +23,5 @@ if __name__ == '__main__':
         result = part_func(read_input_lines("input.txt"))
         print(f"Input result for part {part} is {result}")
 
-        post_answer(2023, part, result)
+        post_answer(2024, part, result)
         print(f"Part {part} result posted !")
