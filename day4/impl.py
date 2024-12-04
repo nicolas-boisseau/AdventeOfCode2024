@@ -4,66 +4,26 @@ from common.common import download_input_if_not_exists, post_answer, capture, ca
 
 download_input_if_not_exists(2024)
 
-def xmas_right(y, x, lines):
-    if lines[y][x] == "X" and x + 3 < len(lines[y]):
-        return lines[y][x+1] == "M" and lines[y][x+2] == "A" and lines[y][x+3] == "S"
-
-def xmas_left(y, x, lines):
-    if lines[y][x] == "X" and x - 3 >= 0:
-        return lines[y][x-1] == "M" and lines[y][x-2] == "A" and lines[y][x-3] == "S"
-
-def xmas_down(y, x, lines):
-    if lines[y][x] == "X" and y + 3 < len(lines):
-        return lines[y+1][x] == "M" and lines[y+2][x] == "A" and lines[y+3][x] == "S"
-
-def xmas_up(y, x, lines):
-    if lines[y][x] == "X" and y - 3 >= 0:
-        return lines[y-1][x] == "M" and lines[y-2][x] == "A" and lines[y-3][x] == "S"
-
-def xmas_right_down(y, x, lines):
-    if lines[y][x] == "X" and x + 3 < len(lines[y]) and y + 3 < len(lines):
-        return lines[y+1][x+1] == "M" and lines[y+2][x+2] == "A" and lines[y+3][x+3] == "S"
-
-def xmas_right_up(y, x, lines):
-    if lines[y][x] == "X" and x + 3 < len(lines[y]) and y - 3 >= 0:
-        return lines[y-1][x+1] == "M" and lines[y-2][x+2] == "A" and lines[y-3][x+3] == "S"
-
-def xmas_left_down(y, x, lines):
-    if lines[y][x] == "X" and x - 3 >= 0 and y + 3 < len(lines):
-        return lines[y+1][x-1] == "M" and lines[y+2][x-2] == "A" and lines[y+3][x-3] == "S"
-
-def xmas_left_up(y, x, lines):
-    if lines[y][x] == "X" and x - 3 >= 0 and y - 3 >= 0:
-        return lines[y-1][x-1] == "M" and lines[y-2][x-2] == "A" and lines[y-3][x-3] == "S"
+def check_xmas(y, x, lines, dx, dy):
+    if lines[y][x] == "X" and 0 <= x + 3 * dx < len(lines[y]) and 0 <= y + 3 * dy < len(lines):
+        return (lines[y + dy][x + dx] == "M" and
+                lines[y + 2 * dy][x + 2 * dx] == "A" and
+                lines[y + 3 * dy][x + 3 * dx] == "S")
+    return False
 
 def part1(lines):
     xmas = 0
+    directions = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
     for y in range(len(lines)):
         for x in range(len(lines[y])):
-            if xmas_right(y, x, lines):
-                xmas += 1
-            if xmas_left(y, x, lines):
-                xmas += 1
-            if xmas_down(y, x, lines):
-                xmas += 1
-            if xmas_up(y, x, lines):
-                xmas += 1
-            if xmas_right_down(y, x, lines):
-                xmas += 1
-            if xmas_right_up(y, x, lines):
-                xmas += 1
-            if xmas_left_down(y, x, lines):
-                xmas += 1
-            if xmas_left_up(y, x, lines):
-                xmas += 1
+            for dx, dy in directions:
+                if check_xmas(y, x, lines, dx, dy):
+                    xmas += 1
     return xmas
 
-def mas_up_right_to_down_left(y, x, lines):
-    return ((lines[y-1][x+1] == "M" and lines[y+1][x-1] == "S") or
-            (lines[y-1][x+1] == "S" and lines[y+1][x-1] == "M"))
-def mas_down_right_to_up_left(y, x, lines):
-    return ((lines[y-1][x-1] == "M" and lines[y+1][x+1] == "S") or
-            (lines[y-1][x-1] == "S" and lines[y+1][x+1] == "M"))
+def check_mas(y, x, lines, dx1, dy1, dx2, dy2):
+    return ((lines[y + dy1][x + dx1] == "M" and lines[y + dy2][x + dx2] == "S") or
+            (lines[y + dy1][x + dx1] == "S" and lines[y + dy2][x + dx2] == "M"))
 
 def cross(x, y, lines) -> bool:
     if x == 0 or x == len(lines[y]) - 1 or y == 0 or y == len(lines) - 1:
@@ -71,13 +31,11 @@ def cross(x, y, lines) -> bool:
 
     crosses = 0
     if lines[y][x] == "A":
-        if mas_up_right_to_down_left(y, x, lines):
+        if check_mas(y, x, lines, 1, -1, -1, 1):
             crosses += 1
-        if mas_down_right_to_up_left(y, x, lines):
+        if check_mas(y, x, lines, -1, -1, 1, 1):
             crosses += 1
     return crosses == 2
-
-
 
 def part2(lines):
     xmas = 0
