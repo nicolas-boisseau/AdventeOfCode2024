@@ -16,14 +16,13 @@ def print_map(lines):
         print(l)
 
 def turn_dir_right(dir):
-    if dir == (-1, 0):
-        return (0, 1)
-    elif dir == (0, 1):
-        return (1, 0)
-    elif dir == (1, 0):
-        return (0, -1)
-    elif dir == (0, -1):
-        return (-1, 0)
+    direction_map = {
+        (-1, 0): (0, 1),
+        (0, 1): (1, 0),
+        (1, 0): (0, -1),
+        (0, -1): (-1, 0)
+    }
+    return direction_map.get(dir)
 
 def move_guard(guard, dir, lines):
     y, x = guard
@@ -43,7 +42,7 @@ def score(lines):
     score = 0
     for y in range(len(lines)):
         for x in range(len(lines[y])):
-            if lines[y][x] == "X" or lines[y][x] == "^" or lines[y][x] == "v" or lines[y][x] == "<" or lines[y][x] == ">":
+            if lines[y][x] in ["X", "^", "v", "<", ">"]:
                 score += 1
     return score
 
@@ -71,16 +70,13 @@ def part1(lines):
 
 
 def get_symbol_by_dir(direction):
-    symbol = "X"
-    if direction == (-1, 0):
-        symbol = "^"
-    elif direction == (0, 1):
-        symbol = ">"
-    elif direction == (1, 0):
-        symbol = "v"
-    elif direction == (0, -1):
-        symbol = "<"
-    return symbol
+    direction_map = {
+        (-1, 0): "^",
+        (0, 1): ">",
+        (1, 0): "v",
+        (0, -1): "<"
+    }
+    return direction_map.get(direction, "X")
 
 
 def part2(lines):
