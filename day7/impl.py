@@ -16,25 +16,21 @@ def try_combinations(numbers, target, current=0) -> bool:
     else:
         return try_combinations(numbers.copy(), target, current + next) or try_combinations(numbers.copy(), target, current * next)
 
-def try_combinations2(numbers_str, target, current="") -> bool:
-    next = numbers_str.pop(0)
-    if len(numbers_str) == 0:
-        if eval(current + "+" + next) == target:
+def try_combinations3(numbers, target, current=0) -> bool:
+    next = numbers.pop(0)
+    if len(numbers) == 0:
+        if current + next == target:
             return True
-        elif eval(current + "*" + next) == target:
+        elif current * next == target:
             return True
-        elif eval(current + next) == target:
+        elif int(str(current)+str(next)) == target:
             return True
         else:
             return False
     else:
-        return (try_combinations2(numbers_str.copy(), target, current + "+" + next if current != "" else next) or
-                try_combinations2(numbers_str.copy(), target, current + "*" + next if current != "" else next) or
-                try_combinations2(numbers_str.copy(), target, current + next if current != "" else next) or
-                try_combinations2(numbers_str.copy(), target, str(eval(current)) + "+" + next if current != "" else next) or
-                try_combinations2(numbers_str.copy(), target, str(eval(current)) + "*" + next if current != "" else next) or
-                try_combinations2(numbers_str.copy(), target, str(eval(current)) + next if current != "" else next)
-                )
+        return (try_combinations3(numbers.copy(), target, current + next) or
+                try_combinations3(numbers.copy(), target, current * next) or
+                try_combinations3(numbers.copy(), target, int(str(current) + str(next))))
 
 def part1(lines):
     score = 0
@@ -54,9 +50,9 @@ def part2(lines):
     for l in lines:
         split = l.split(": ")
         target = int(split[0])
-        numbers_str = [n for n in split[1].split(" ")]
-        print(target, numbers_str)
-        if try_combinations2(numbers_str, target):
+        numbers = [int(n) for n in split[1].split(" ")]
+        print(target, numbers)
+        if try_combinations3(numbers[1:], target, numbers[0]):
             score += target
             print("True")
     return score
