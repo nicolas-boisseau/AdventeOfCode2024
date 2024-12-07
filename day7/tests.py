@@ -17,7 +17,7 @@ class AdventOfCodeTests(unittest.TestCase):
 
     def test_part2_input(self):
         # 34203806308266 is too low
-        self.assertEqual(4, part2(read_input_lines("input.txt")))
+        self.assertEqual(37598910447546, part2(read_input_lines("input.txt")))
 
 
 if __name__ == '__main__':
