@@ -18,13 +18,7 @@ def score(lines):
     return score
 
 def part1(lines):
-    antennas = {}
-    for y in range(len(lines)):
-        for x in range(len(lines[y])):
-            if lines[y][x] != ".":
-                if lines[y][x] not in antennas:
-                    antennas[lines[y][x]] = []
-                antennas[lines[y][x]].append((y, x))
+    antennas = extract_antennas(lines)
 
     for type, positions in antennas.items():
         print(f"{type}: {positions}")
@@ -41,14 +35,49 @@ def part1(lines):
 
     return score(lines)
 
-def part2(lines):
-    return 4
 
+def extract_antennas(lines):
+    antennas = {}
+    for y in range(len(lines)):
+        for x in range(len(lines[y])):
+            if lines[y][x] != ".":
+                if lines[y][x] not in antennas:
+                    antennas[lines[y][x]] = []
+                antennas[lines[y][x]].append((y, x))
+    return antennas
+
+
+def part2(lines):
+    antennas = extract_antennas(lines)
+
+    for type, positions in antennas.items():
+        print(f"{type}: {positions}")
+        for p in positions:
+            for other_p in positions:
+                if p != other_p:
+                    print(f"  {p} -> {other_p} : {abs(p[0] - other_p[0]) + abs(p[1] - other_p[1])}")
+                    #print(f" dist_y: {abs(p[0] - other_p[0])}, dist_x: {abs(p[1] - other_p[1])}")
+                    a_y = p[0] + p[0] - other_p[0]
+                    a_x = p[1] + p[1] - other_p[1]
+
+                    while a_y < len(lines) and a_y >= 0 and a_x < len(lines[a_y]) and a_x >= 0:
+                        lines[a_y] = lines[a_y][:a_x] + "#" + lines[a_y][a_x + 1:]
+                        a_y += p[0] - other_p[0]
+                        a_x += p[1] - other_p[1]
+
+                    # and p is also an antinode
+                    y = p[0]
+                    x = p[1]
+                    lines[y] = lines[y][:x] + "#" + lines[y][x + 1:]
+
+    print_map(lines)
+
+    return score(lines)
 
 if __name__ == '__main__':
 
-    part = 1
-    expectedSampleResult = 14
+    part = 2
+    expectedSampleResult = 34
 
     part_func = part1 if part == 1 else part2
     if part_func(read_input_lines("sample.txt")) == expectedSampleResult:
