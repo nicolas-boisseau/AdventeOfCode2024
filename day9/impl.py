@@ -133,35 +133,41 @@ def part2(lines):
         blocks[i].isFree = True
         i-=1
 
-    res = ""
+    res = []
     for b in blocks:
         if len(b.subBlocks) > 0:
             for sb in b.subBlocks:
                 if sb.isFree:
-                    res += "." * sb.size
+                    for i in range(sb.size):
+                        res.append(-1)
                     print("." * sb.size, end="")
                 else:
-                    res += str(sb.id) * sb.size
+                    for i in range(sb.size):
+                        res.append(sb.id)
                     print(str(sb.id) * sb.size, end="")
             if b.size > 0:
                 # print remaining free block
-                res += "." * b.size
+                for i in range(b.size):
+                    res.append(-1)
                 print("." * b.size, end="")
         elif b.isFree:
-            res += "." * b.size
+            for i in range(b.size):
+                res.append(-1)
             print("."*b.size, end="")
         else:
-            res += str(b.id) * b.size
+            for i in range(b.size):
+                res.append(b.id)
             print(str(b.id)*b.size, end="")
 
-    return checksum_str(res)
+
+    return checksum(res)
 
 
 
 if __name__ == '__main__':
 
-    part = 1
-    expectedSampleResult = 1928
+    part = 2
+    expectedSampleResult = 2858
 
     part_func = part1 if part == 1 else part2
     if part_func(read_input_lines("sample.txt")) == expectedSampleResult:
