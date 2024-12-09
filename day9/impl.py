@@ -9,6 +9,16 @@ class Block:
         self.id = id
         self.size = size
         self.isFree = isFree
+        self.subBlocks = []
+
+    def insert_sub_block(self, block):
+        if (block.size > self.size):
+            raise ValueError("Block is too big")
+        self.subBlocks.append(block)
+        self.size -= block.size
+        if self.size == 0:
+            self.isFree = False
+
 
 
 def blocks_to_string(blocks):
@@ -39,17 +49,26 @@ def extract_blocks(lines):
         i += 1
     return blocks
 
-def firstFreeBlock(blocks):
+def firstFreeBlock(needed_size, blocks):
+    i = 0
     for b in blocks:
-        if b.isFree:
-            return b
-    return None
+        if b.isFree and b.size >= needed_size:
+            return b, i
+        i += 1
+    return None, -1
 
 def checksum(intlist):
     score = 0
     for i in range(len(intlist)):
         if intlist[i] != -1:
             score += intlist[i] * i
+    return score
+
+def checksum_str(strr):
+    score = 0
+    for i in range(len(strr)):
+        if strr[i] != ".":
+            score += int(strr[i]) * i
     return score
 
 def print_intlist(intlist):
@@ -98,7 +117,45 @@ def part1(lines):
 
 
 def part2(lines):
-    return 4
+    blocks = extract_blocks(lines)
+
+    i = len(blocks) - 1
+    while i >= 0:
+        current_block = blocks[i]
+        if current_block.isFree:
+            i -= 1
+            continue
+        nextFree, j = firstFreeBlock(current_block.size, blocks[:i])
+        if nextFree is None:
+            i -= 1
+            continue
+        blocks[j].insert_sub_block(Block(current_block.id, current_block.size, False))
+        blocks[i].isFree = True
+        i-=1
+
+    res = ""
+    for b in blocks:
+        if len(b.subBlocks) > 0:
+            for sb in b.subBlocks:
+                if sb.isFree:
+                    res += "." * sb.size
+                    print("." * sb.size, end="")
+                else:
+                    res += str(sb.id) * sb.size
+                    print(str(sb.id) * sb.size, end="")
+            if b.size > 0:
+                # print remaining free block
+                res += "." * b.size
+                print("." * b.size, end="")
+        elif b.isFree:
+            res += "." * b.size
+            print("."*b.size, end="")
+        else:
+            res += str(b.id) * b.size
+            print(str(b.id)*b.size, end="")
+
+    return checksum_str(res)
+
 
 
 if __name__ == '__main__':
