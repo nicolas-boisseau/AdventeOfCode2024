@@ -51,10 +51,10 @@ def part2(lines):
         split = l.split(": ")
         target = int(split[0])
         numbers = [int(n) for n in split[1].split(" ")]
-        print(target, numbers)
+        #print(target, numbers)
         if try_combinations3(numbers[1:], target, numbers[0]):
             score += target
-            print("True")
+            #print("True")
     return score
 
 
