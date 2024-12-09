@@ -20,12 +20,21 @@ def blocks_to_string(blocks):
             result += b.size * str(b.id)
     return result
 
+def blocks_to_int_list(blocks):
+    result = []
+    for b in blocks:
+        if b.isFree:
+            for i in range(b.size):
+                result.append(-1)
+        else:
+            for i in range(b.size):
+                result.append(b.id)
+    return result
+
 def extract_blocks(lines):
     i = 0
     blocks = []
     for c in lines[0]:
-        if (i // 2 > 9):
-            print("Too many blocks")
         blocks.append(Block(i // 2, int(c), not i % 2 == 0))
         i += 1
     return blocks
@@ -36,48 +45,55 @@ def firstFreeBlock(blocks):
             return b
     return None
 
-def checksum(str):
+def checksum(intlist):
     score = 0
-    for i in range(len(str)):
-        if str[i] != '.':
-            score += int(str[i]) * i
+    for i in range(len(intlist)):
+        if intlist[i] != -1:
+            score += intlist[i] * i
     return score
+
+def print_intlist(intlist):
+    result = ""
+    for b in intlist:
+        if b == -1:
+            result += '.'
+        else:
+            result += str(b)
+    return result
 
 def part1(lines):
     blocks = extract_blocks(lines)
-    strb = blocks_to_string(blocks)
-    print(strb)
+    intlist = blocks_to_int_list(blocks)
+    print(intlist)
+    print(print_intlist(intlist))
 
     i = 0
-    res = ""
+    res = []
     score = 0
-    lastMax = len(strb) - 1
-    while i < len(strb):
-        if strb[i] == '.':
+    lastMax = len(intlist) - 1
+    while i < len(intlist) and i <= lastMax:
+        if intlist[i] == -1:
             j = lastMax
             while j > i:
-                if strb[j] != '.':
-                    res += strb[j]
-                    score += int(strb[j]) * i
-                    #print(f"Remove {strb[j:]}")
-                    strb = strb[:i] + strb[j] + strb[i+1:]
-                    strb = strb[:j] + "." + strb[j + 1:]
-                    lastMax = j
+                if intlist[j] != -1:
+                    res.append(intlist[j])
+                    score += intlist[j] * i
+                    lastMax = j-1
                     break
                 j -= 1
         else:
-
-            res += strb[i]
-            score += int(strb[i]) * i
+            res.append(intlist[i])
+            score += intlist[i] * i
 
         i += 1
 
-    print(strb)
+    print(res)
+    print(print_intlist(res))
     print(f"Score: {score}")
 
     #print(res)
 
-    return checksum(strb)
+    return score
 
 
 
