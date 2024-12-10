@@ -41,19 +41,25 @@ def print_lines_with_current_position(x, y, lines):
     print()
 
 def try_reach_nine_step_by_step(x, y, lines, current_score: int = 0, already_scored = []) -> int:
-    print_lines_with_current_position(x, y, lines)
-    if int(lines[y][x]) == 9 and (x, y) not in already_scored:
-        already_scored += [(x, y)]
-        return 1 + current_score
+    #print_lines_with_current_position(x, y, lines)
+
+    if lines[y][x] != "." and int(lines[y][x]) == 9:
+        #print(already_scored)
+        #print(f"Reached 9 at {(x, y)}")
+        if (x, y) not in already_scored:
+            #print("already scored modified")
+            already_scored += [(x, y)]
+            #print("+1")
+            return current_score + 1
     else:
         if can_go_right(x, y, lines):
-            current_score = try_reach_nine_step_by_step(x + 1, y, lines, current_score)
+            current_score = try_reach_nine_step_by_step(x + 1, y, lines, current_score, already_scored)
         if can_go_left(x, y, lines):
-            current_score = try_reach_nine_step_by_step(x - 1, y, lines, current_score)
+            current_score = try_reach_nine_step_by_step(x - 1, y, lines, current_score, already_scored)
         if can_go_up(x, y, lines):
-            current_score = try_reach_nine_step_by_step(x, y - 1, lines, current_score)
+            current_score = try_reach_nine_step_by_step(x, y - 1, lines, current_score, already_scored)
         if can_go_down(x, y, lines):
-            current_score = try_reach_nine_step_by_step(x, y + 1, lines, current_score)
+            current_score = try_reach_nine_step_by_step(x, y + 1, lines, current_score, already_scored)
     return current_score
 
 def part1(lines):
@@ -61,9 +67,12 @@ def part1(lines):
 
     total_score = 0
     for z in zeros:
-        sub_score = try_reach_nine_step_by_step(z[0], z[1], lines, 0, [])
-        print(sub_score)
+        #print("Starting from", z)
+        already_scored = []
+        sub_score = try_reach_nine_step_by_step(z[0], z[1], lines, 0, already_scored)
+        #print(sub_score)
         total_score += sub_score
+        #print("-----")
 
     return total_score
 
