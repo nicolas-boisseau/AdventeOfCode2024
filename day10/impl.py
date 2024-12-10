@@ -44,12 +44,10 @@ def try_reach_nine_step_by_step(x, y, lines, current_score: int = 0, already_sco
     #print_lines_with_current_position(x, y, lines)
 
     if lines[y][x] != "." and int(lines[y][x]) == 9:
-        #print(already_scored)
-        #print(f"Reached 9 at {(x, y)}")
-        if (x, y) not in already_scored:
-            #print("already scored modified")
+        if already_scored is None: # part 2
+            return current_score + 1
+        elif (x, y) not in already_scored: # part 1
             already_scored += [(x, y)]
-            #print("+1")
             return current_score + 1
     else:
         if can_go_right(x, y, lines):
@@ -67,19 +65,22 @@ def part1(lines):
 
     total_score = 0
     for z in zeros:
-        #print("Starting from", z)
         already_scored = []
         sub_score = try_reach_nine_step_by_step(z[0], z[1], lines, 0, already_scored)
-        #print(sub_score)
         total_score += sub_score
-        #print("-----")
 
     return total_score
 
 
 def part2(lines):
-    return 4
+    zeros = findZeroPositions(lines)
 
+    total_score = 0
+    for z in zeros:
+        sub_score = try_reach_nine_step_by_step(z[0], z[1], lines, 0, None)
+        total_score += sub_score
+
+    return total_score
 
 if __name__ == '__main__':
 
