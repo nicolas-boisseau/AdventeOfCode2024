@@ -16,10 +16,13 @@ class AdventOfCodeTests(unittest.TestCase):
         self.assertEqual(194782, part1(read_input_lines("input.txt")))
 
     def test_part2_sample(self):
-        self.assertEqual(2, part2(read_input_lines("sample.txt")))
+        self.assertEqual(55312, part2(read_input_lines("sample.txt")))
+
+    def test_part1_input_75(self):
+        self.assertEqual(4, part1(read_input_lines("input.txt"), 75))
 
     def test_part2_input(self):
-        self.assertEqual(4, part1(read_input_lines("input.txt"), 75))
+        self.assertEqual(233007586663131, part2(read_input_lines("input.txt")))
 
 
 if __name__ == '__main__':
