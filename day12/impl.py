@@ -20,57 +20,64 @@ def can_go_down(x, y, lines, current_symbol):
     return (y < len(lines) - 1 and
             lines[y + 1][x] == current_symbol)
 
-def propagate(current_symbol, x, y, lines, visited=[], area=1, perimeter=0):
-    visited += [(x, y)]
-    if (x+1,y) not in visited:
+def propagate(current_symbol, x, y, lines, visited={}, area=1, perimeter=0):
+    visited[(x, y)] = True
+    if (x+1,y) not in visited.keys():
         if can_go_right(x, y, lines, current_symbol):
-            a,p = propagate(current_symbol, x + 1, y, lines, visited, area, 0)
+            a,p,v = propagate(current_symbol, x + 1, y, lines, visited, area, 0)
             area = a+1
             perimeter += p
+            visited = {**visited, **v}
         else:
             perimeter += 1
-    if (x-1,y) not in visited:
+    if (x-1,y) not in visited.keys():
         if can_go_left(x, y, lines, current_symbol):
-            a,p = propagate(current_symbol, x - 1, y, lines, visited, area, 0)
+            a,p,v = propagate(current_symbol, x - 1, y, lines, visited, area, 0)
             area = a+1
             perimeter += p
+            visited = {**visited, **v}
         else:
             perimeter += 1
-    if (x,y-1) not in visited:
+    if (x,y-1) not in visited.keys():
         if can_go_up(x, y, lines, current_symbol):
-            a,p = propagate(current_symbol, x, y - 1, lines, visited, area, 0)
+            a,p,v  = propagate(current_symbol, x, y - 1, lines, visited, area, 0)
             area = a+1
             perimeter += p
+            visited = {**visited, **v}
         else:
             perimeter += 1
-    if (x,y+1) not in visited:
+    if (x,y+1) not in visited.keys():
         if can_go_down(x, y, lines, current_symbol):
-            a,p = propagate(current_symbol, x, y + 1, lines, visited, area, 0)
+            a,p,v = propagate(current_symbol, x, y + 1, lines, visited, area, 0)
             area = a+1
             perimeter += p
+            visited = {**visited, **v}
         else:
             perimeter += 1
 
     return area, perimeter, visited
 
+
 def get_first_position_of_each_symbol(lines, visited):
     positions = {}
     for y in range(len(lines)):
         for x in range(len(lines[y])):
-            if (x,y) not in visited and lines[y][x] not in positions:
+            if (x,y) not in visited.keys() and lines[y][x] not in positions:
                 positions[lines[y][x]] = (x, y)
     return positions
 
 def part1(lines):
-    all_visited = []
-    while len(all_visited) < len(lines)*len(lines[0]):
-        symbol_positions = get_first_position_of_each_symbol(lines)
-        score = 0
+    all_visited = {}
+    score = 0
+    while True:
+        symbol_positions = get_first_position_of_each_symbol(lines, all_visited)
+        if len(symbol_positions) == 0:
+            break
         for symbol, (x, y) in symbol_positions.items():
-            area, perimeter, visited = propagate(symbol, x, y, lines, [], 1, 0)
+            area, perimeter, visited = propagate(symbol, x, y, lines, {}, 1, 0)
             print(f"Symbol={symbol}, Area: {area}, Perimeter: {perimeter}")
             score += area * perimeter
-            all_visited += visited
+            all_visited = {**all_visited, **visited}
 
     return score
 
