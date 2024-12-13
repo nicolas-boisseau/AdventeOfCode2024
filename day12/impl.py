@@ -98,7 +98,7 @@ def part1(lines):
 
     return score, nb_symbol
 
-def build_outside(outside):
+def build_outside(outside, dir):
     max_x = max([x for x, y, dx, dy in outside])
     min_x = min([x for x, y, dx, dy  in outside])
     max_y = max([y for x, y, dx, dy in outside])
@@ -109,40 +109,20 @@ def build_outside(outside):
         l = ""
         for x in range(min_x, max_x+1):
             nb = 0
-            nb += 1 if (x,y,1,0) in outside else 0
-            nb += 1 if (x,y,-1,0) in outside else 0
-            nb += 1 if (x,y,0,1) in outside else 0
-            nb += 1 if (x,y,0,-1) in outside else 0
+            nb += 1 if (x,y,1,0)  in outside and dir == (1,0) else 0
+            nb += 1 if (x,y,-1,0)  in outside and dir == (-1,0) else 0
+            nb += 1 if (x,y,0,1) in outside and dir == (0,1) else 0
+            nb += 1 if (x,y,0,-1) in outside and dir == (0,-1) else 0
             if nb == 0:
                 l += "."
-                print(".", end="")
+                #print(".", end="")
             else:
                 l += str(nb)
-                print(nb, end="")
-        print()
+                #print(nb, end="")
+        #print()
         output += [l]
-    print()
+    #print()
 
-    return output
-
-def all_elements_are_dots(grid):
-    for row in grid:
-        for element in row:
-            if element != ".":
-                return False
-    return True
-
-def new_grid_by_step(grid):
-    output = []
-    for y in range(len(grid)):
-        l = ""
-        for x in range(len(grid[y])):
-            if grid[y][x] != "." and int(grid[y][x]) > 0:
-                grid[y] = grid[y][:x] + str(int(grid[y][x]) - 1) + grid[y][x+1:]
-                l += "1"
-            else:
-                l += "."
-        output += [l]
     return output
 
 def part2(lines):
@@ -154,14 +134,16 @@ def part2(lines):
             break
         for symbol, (x, y) in symbol_positions.items():
             area, perimeter, visited, outside = propagate(symbol, x, y, lines, {}, 1, 0, {})
-            outside_lines = build_outside(outside.keys())
-            step = new_grid_by_step(outside_lines)
             total_sides = 0
-            while not all_elements_are_dots(step):
-                _, sides = part1(step)
+
+            directions = [(1,0), (-1,0), (0,1), (0,-1)]
+            for dir in directions:
+                outside_lines = build_outside(outside.keys(), dir)
+                _, sides = part1(outside_lines)
                 total_sides += sides
-                step = new_grid_by_step(outside_lines)
-            print(f"Symbol={symbol}, Area: {area}, Sides: {sides}")
+
+
+            print(f"Symbol={symbol}, Area: {area}, Sides: {total_sides}")
             score += area * total_sides
             all_visited = {**all_visited, **visited}
 

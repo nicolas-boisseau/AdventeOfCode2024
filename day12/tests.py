@@ -34,14 +34,8 @@ class AdventOfCodeTests(unittest.TestCase):
     def test_part2_sample5(self):
         self.assertEqual(368, part2(read_input_lines("sample5.txt")))
 
-    def test_part1_test_nico(self):
-        _, nb = part1(read_input_lines("test_nico.txt"))
-        _, nb2 = part1(read_input_lines("test_nico2.txt"))
-        _, nb3 = part1(read_input_lines("test_nico3.txt"))
-        self.assertEqual(12, nb+nb2+nb3)
-
     def test_part2_input(self):
-        self.assertEqual(4, part2(read_input_lines("input.txt")))
+        self.assertEqual(901100, part2(read_input_lines("input.txt")))
 
 
 if __name__ == '__main__':
