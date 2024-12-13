@@ -39,12 +39,22 @@ def part1(lines):
         else:
             print(sol)
             nb_tokens += sol[0]*3 + sol[1]*1
-
-
     return nb_tokens
 
 def part2(lines):
-    return 4
+    nb_tokens = 0
+    for a_x, a_y, b_x, b_y, p_x, p_y in extract(lines):
+        print(a_x, a_y, b_x, b_y, p_x, p_y)
+        p_x += 10000000000000
+        p_y += 10000000000000
+
+        sol = solve(a_x, b_x, p_x, a_y, b_y, p_y)
+        if sol is None or (not sol[0].is_integer() or not sol[1].is_integer()):
+            print("No solution")
+        else:
+            print(sol)
+            nb_tokens += sol[0] * 3 + sol[1] * 1
+    return nb_tokens
 
 
 if __name__ == '__main__':
