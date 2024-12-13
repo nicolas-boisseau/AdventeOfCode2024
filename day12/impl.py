@@ -125,6 +125,25 @@ def build_outside(outside):
 
     return output
 
+def all_elements_are_dots(grid):
+    for row in grid:
+        for element in row:
+            if element != ".":
+                return False
+    return True
+
+def new_grid_by_step(grid):
+    output = []
+    for y in range(len(grid)):
+        l = ""
+        for x in range(len(grid[y])):
+            if grid[y][x] != "." and int(grid[y][x]) > 0:
+                grid[y] = grid[y][:x] + str(int(grid[y][x]) - 1) + grid[y][x+1:]
+                l += "1"
+            else:
+                l += "."
+        output += [l]
+    return output
 
 def part2(lines):
     all_visited = {}
@@ -136,9 +155,14 @@ def part2(lines):
         for symbol, (x, y) in symbol_positions.items():
             area, perimeter, visited, outside = propagate(symbol, x, y, lines, {}, 1, 0, {})
             outside_lines = build_outside(outside.keys())
-            _, sides = part1(outside_lines)
+            step = new_grid_by_step(outside_lines)
+            total_sides = 0
+            while not all_elements_are_dots(step):
+                _, sides = part1(step)
+                total_sides += sides
+                step = new_grid_by_step(outside_lines)
             print(f"Symbol={symbol}, Area: {area}, Sides: {sides}")
-            score += area * sides
+            score += area * total_sides
             all_visited = {**all_visited, **visited}
 
     return score
