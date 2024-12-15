@@ -62,43 +62,13 @@ def try_move_robot(m_dir, x, y, grid):
         "^": (0, -1),
         "v": (0, 1)
     }
-    reversed_dir = {
-        ">": "<",
-        "<": ">",
-        "^": "v",
-        "v": "^"
-    }
     dx, dy = dir[m_dir]
-
-    # # get all in the line before "#"
-    # cur_x, cur_y = x, y
-    # to_move = []
-    # while grid[cur_y][cur_x] != "#":
-    #     if grid[cur_y][cur_x] in ["@", "O"]:
-    #         to_move += [(cur_x, cur_y)]
-    #     cur_x += dx
-    #     cur_y += dy
-    # wall_x, wall_y = (cur_x, cur_y)
 
     cur_x, cur_y = x, y
     if is_place_free_in_direction(cur_x, cur_y, dx, dy, grid):
         push_robot_in_direction(cur_x, cur_y, dx, dy, grid)
         cur_x += dx
         cur_y += dy
-
-    # move and all others
-    # to_move.reverse()
-    # back_dir = reversed_dir[m_dir]
-    # bdx, bdy = dir[back_dir]
-    # cur_x, cur_y = wall_x+bdx, wall_y+bdy
-    # for x, y in to_move:
-    #     if cur_y == y and cur_x == x:
-    #         break
-    #     grid[cur_x][cur_y] = grid[x][y]
-    #     grid[x][y] = "."
-    #     cur_x += bdx
-    #     cur_y += bdy
-
 
 def print_grid(grid):
     for l in grid:
@@ -122,7 +92,7 @@ def part1(lines):
     #print_grid(grid)
 
     for m in moves:
-        print(f"Move {m}")
+        #print(f"Move {m}")
         x, y = find_robot_position(grid)
         try_move_robot(m, x, y, grid)
         #print_grid(grid)
