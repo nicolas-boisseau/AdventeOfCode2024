@@ -35,7 +35,7 @@ def is_place_free_in_direction(x, y, dx, dy, grid):
             return True, (x, y)
         x += dx
         y += dy
-    return False
+    return False, (-1, -1)
 
 def push_robot_in_direction(x, y, dx, dy, grid):
     reversed_dir = {
@@ -44,7 +44,9 @@ def push_robot_in_direction(x, y, dx, dy, grid):
         (0, 1): (0,-1),
         (0, -1): (0,1)
     }
-    _, (nx, ny) = is_place_free_in_direction(x, y, dx, dy, grid)
+    can_move, (nx, ny) = is_place_free_in_direction(x, y, dx, dy, grid)
+    if not can_move:
+        return
     cur_x, cur_y = (nx, ny)
     dnx, dny = reversed_dir[(dx, dy)]
     while not (cur_x, cur_y) == (x, y):
@@ -63,12 +65,7 @@ def try_move_robot(m_dir, x, y, grid):
         "v": (0, 1)
     }
     dx, dy = dir[m_dir]
-
-    cur_x, cur_y = x, y
-    if is_place_free_in_direction(cur_x, cur_y, dx, dy, grid):
-        push_robot_in_direction(cur_x, cur_y, dx, dy, grid)
-        cur_x += dx
-        cur_y += dy
+    push_robot_in_direction(x, y, dx, dy, grid)
 
 def print_grid(grid):
     for l in grid:
@@ -100,8 +97,100 @@ def part1(lines):
 
     return score_grid(grid)
 
+def elarge_width_grid(grid):
+    new_grid = []
+    replacements = {
+        "#": "##",
+        ".": "..",
+        "O": "[]",
+        "@": "@.",
+    }
+    for y in range(len(grid)):
+        row = []
+        for x in range(len(grid[y])):
+            new = replacements[grid[y][x]]
+            row += [new[0], new[1]]
+        new_grid.append(row)
+
+    return new_grid
+
+def is_place_free_in_direction2(x, y, dx, dy, grid, visited):
+    while y >= 0 and x >= 0 and y < len(grid) and x < len(grid[y]) and grid[y][x] != "#":
+        if grid[y][x] in ["."]:
+            return True, (x, y)
+        x += dx
+        y += dy
+    return False, (-1, -1)
+
+def push_robot_in_direction2(x, y, dx, dy, grid, visited):
+    reversed_dir = {
+        (1, 0): (-1,0),
+        (-1, 0): (1,0),
+        (0, 1): (0,-1),
+        (0, -1): (0,1)
+    }
+    if (x, y) in visited:
+        return
+    visited.add((x, y))
+    can_move, (nx, ny) = is_place_free_in_direction2(x, y, dx, dy, grid, visited)
+    if not can_move:
+        return
+    cur_x, cur_y = (nx, ny)
+    dnx, dny = reversed_dir[(dx, dy)]
+    while not (cur_x, cur_y) == (x, y):
+        visited.add((cur_x, cur_y))
+        to_move_val = grid[cur_y+dny][cur_x+dnx]
+        can_move_r, _ = is_place_free_in_direction2(cur_x + dnx + 1, cur_y + dny, dx, dy, grid, visited)
+        can_move_l, _ = is_place_free_in_direction2(cur_x + dnx - 1, cur_y + dny, dx, dy, grid, visited)
+        if dnx == 0 and (to_move_val == "[" and not can_move_r) or (to_move_val == "]" and not can_move_l):
+            return
+        prev_val = grid[cur_y][cur_x]
+        grid[cur_y][cur_x] = to_move_val
+        grid[cur_y + dny][cur_x + dnx] = prev_val
+
+        if to_move_val == "[" and dnx == 0:
+            # need to move also his brother "]"
+            push_robot_in_direction2(cur_x + dnx + 1, cur_y + dny, dx, dy, grid, visited)
+
+        elif to_move_val == "]" and dnx == 0:
+            # need to move also his brother "["
+            push_robot_in_direction2(cur_x + dnx - 1, cur_y + dny, dx, dy, grid, visited)
+
+        cur_x += dnx
+        cur_y += dny
+
+def try_move_robot2(m_dir, x, y, grid):
+    dir = {
+        ">": (1, 0),
+        "<": (-1, 0),
+        "^": (0, -1),
+        "v": (0, 1)
+    }
+    dx, dy = dir[m_dir]
+    push_robot_in_direction2(x, y, dx, dy, grid, set())
+
+
+def score_grid2(grid):
+    score = 0
+    for y in range(len(grid)):
+        for x in range(len(grid[y])):
+            if grid[y][x] == "[":
+                score += x + y * 100
+    return score
+
 def part2(lines):
-    return 4
+    grid, moves = extract_grid_and_moves(lines)
+    new_grid = elarge_width_grid(grid)
+    #print_grid(new_grid)
+
+    for m in moves:
+        #print(f"Move {m}")
+        x, y = find_robot_position(new_grid)
+        try_move_robot2(m, x, y, new_grid)
+        #print_grid(new_grid)
+
+    print_grid(new_grid)
+    return score_grid2(new_grid)
 
 
 if __name__ == '__main__':
