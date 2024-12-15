@@ -137,7 +137,7 @@ def part2(lines):
 if __name__ == '__main__':
 
     part = 1
-    expectedSampleResult = 2048
+    expectedSampleResult = 2028
 
     part_func = part1 if part == 1 else part2
     if part_func(read_input_lines("sample.txt")) == expectedSampleResult:
