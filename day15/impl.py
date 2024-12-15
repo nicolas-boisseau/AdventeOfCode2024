@@ -12,9 +12,12 @@ def extract_grid_and_moves(lines):
             break
         grid.append([c for c in l])
         i += 1
+    i+=1
     moves = []
-    for c in lines[i+1]:
-        moves.append(c)
+    while i < len(lines):
+        for c in lines[i]:
+            moves.append(c)
+        i += 1
 
     return grid, moves
 
@@ -78,7 +81,7 @@ def try_move_robot(m_dir, x, y, grid):
     # wall_x, wall_y = (cur_x, cur_y)
 
     cur_x, cur_y = x, y
-    while is_place_free_in_direction(cur_x, cur_y, dx, dy, grid):
+    if is_place_free_in_direction(cur_x, cur_y, dx, dy, grid):
         push_robot_in_direction(cur_x, cur_y, dx, dy, grid)
         cur_x += dx
         cur_y += dy
@@ -105,20 +108,27 @@ def print_grid(grid):
     print()
 
 
-
+def score_grid(grid):
+    score = 0
+    for y in range(len(grid)):
+        for x in range(len(grid[y])):
+            if grid[y][x] == "O":
+                score += x + y * 100
+    return score
 
 
 def part1(lines):
     grid, moves = extract_grid_and_moves(lines)
-    print_grid(grid)
+    #print_grid(grid)
 
     for m in moves:
         print(f"Move {m}")
         x, y = find_robot_position(grid)
         try_move_robot(m, x, y, grid)
-        print_grid(grid)
-    print_grid(grid)
-    return 4
+        #print_grid(grid)
+    #print_grid(grid)
+
+    return score_grid(grid)
 
 def part2(lines):
     return 4
@@ -127,7 +137,7 @@ def part2(lines):
 if __name__ == '__main__':
 
     part = 1
-    expectedSampleResult = -1
+    expectedSampleResult = 2048
 
     part_func = part1 if part == 1 else part2
     if part_func(read_input_lines("sample.txt")) == expectedSampleResult:
