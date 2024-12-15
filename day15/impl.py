@@ -35,14 +35,22 @@ def is_place_free_in_direction(x, y, dx, dy, grid):
     return False
 
 def push_robot_in_direction(x, y, dx, dy, grid):
+    reversed_dir = {
+        (1, 0): (-1,0),
+        (-1, 0): (1,0),
+        (0, 1): (0,-1),
+        (0, -1): (0,1)
+    }
     _, (nx, ny) = is_place_free_in_direction(x, y, dx, dy, grid)
-    cur_x, cur_y = x, y
-    while not (cur_x, cur_y) == (nx, ny):
+    cur_x, cur_y = (nx, ny)
+    dnx, dny = reversed_dir[(dx, dy)]
+    while not (cur_x, cur_y) == (x, y):
+        to_move_val = grid[cur_y+dny][cur_x+dnx]
         prev_val = grid[cur_y][cur_x]
-        grid[cur_y][cur_x] = "."
-        grid[cur_y+dy][cur_x+dx] = prev_val
-        cur_x += dx
-        cur_y += dy
+        grid[cur_y][cur_x] = to_move_val
+        grid[cur_y+dny][cur_x+dnx] = prev_val
+        cur_x += dnx
+        cur_y += dny
 
 def try_move_robot(m_dir, x, y, grid):
     dir = {
