@@ -5,11 +5,19 @@ from day16.custom_astar import CustomAStar
 
 download_input_if_not_exists(2024)
 
+def get_last_move_at(x, y, path):
+    for i in range(len(path)-1, 0, -1):
+        s = path[i].split(",")
+        if int(s[0]) == x and int(s[1]) == y:
+            return s[2]
+    return None
+
 def print_path(lines, path):
     for y, line in enumerate(lines):
         for x, c in enumerate(line):
-            if f"{x},{y}" in path:
-                print("O", end="")
+            lastMove = get_last_move_at(x, y, path)
+            if lastMove is not None:
+                print(lastMove, end="")
             else:
                 print(c, end="")
         print()
@@ -19,24 +27,6 @@ def print_path(lines, path):
 def part1(lines):
     nodes = {}
     dir = ["^", ">", "v", "<"]
-    cost = {
-        "^^": 1,
-        ">>": 1,
-        "vv": 1,
-        "<<": 1,
-        "^>": 1001,
-        ">v": 1001,
-        "v<": 1001,
-        "<^": 1001,
-        "^v": 2001,
-        "v^": 2001,
-        "<>": 2001,
-        "><": 2001,
-        "^<": 3001,
-        "<v": 3001,
-        "v>": 3001,
-        ">^": 3001
-    }
     s, e = None, None
     for y, line in enumerate(lines):
         for x, char in enumerate(line):
@@ -48,34 +38,39 @@ def part1(lines):
             for d_s in dir:
                 node_key = f"{x},{y},{d_s}"
                 nodes[node_key] = []
-                if x > 0 and line[x-1] != "#":
-                    for d_d in dir:
-                        left_key = f"{x-1},{y},{d_d}"
-                        nodes[node_key].append((left_key, cost[f"{d_s}{d_d}"]))
-                if y > 0 and lines[y-1][x] != "#":
-                    for d_d in dir:
-                        up_key = f"{x},{y-1},{d_d}"
-                        nodes[node_key].append((up_key, cost[f"{d_s}{d_d}"]))
-                if x < len(line)-1 and line[x+1] != "#":
-                    for d_d in dir:
-                        right_key = f"{x+1},{y},{d_d}"
-                        nodes[node_key].append((right_key, cost[f"{d_s}{d_d}"]))
-                if y < len(lines)-1 and lines[y+1][x] != "#":
-                    for d_d in dir:
-                        down_key = f"{x},{y+1},{d_d}"
-                        nodes[node_key].append((down_key, cost[f"{d_s}{d_d}"]))
 
-    astar = CustomAStar(nodes, use_adminissible_heuristic=False)
+                # can turn for cost 1000
+                next_dir = dir[(dir.index(d_s) + 1) % 4]
+                nodes[node_key].append((f"{x},{y},{next_dir}", 1000))
+
+                # can go forward for cost 1
+                if d_s == "^" and y > 0 and lines[y-1][x] != "#":
+                    nodes[node_key].append((f"{x},{y-1},{d_s}", 1))
+                elif d_s == ">" and x < len(lines[y])-1 and lines[y][x+1] != "#":
+                    nodes[node_key].append((f"{x+1},{y},{d_s}", 1))
+                elif d_s == "v" and y < len(lines)-1 and lines[y+1][x] != "#":
+                    nodes[node_key].append((f"{x},{y+1},{d_s}", 1))
+                elif d_s == "<" and x > 0 and lines[y][x-1] != "#":
+                    nodes[node_key].append((f"{x-1},{y},{d_s}", 1))
+
+
+    astar = CustomAStar(nodes, use_adminissible_heuristic=True, part=1)
 
     start = f"{s},>"
     end = f"{e},^"
     path = list(astar.astar(start, end))
 
-    #print_path(lines, path)
+    print_path(lines, path)
 
-    #print(path)
-
-    return len(path) - 1
+    print(path)
+    score = 0
+    for i in range(len(path)-1):
+        next = nodes[path[i]]
+        for n in next:
+            if n[0] == path[i+1]:
+                score += n[1]
+                break
+    return score
 
 
 
