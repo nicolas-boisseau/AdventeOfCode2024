@@ -18,6 +18,25 @@ def print_path(lines, path):
 
 def part1(lines):
     nodes = {}
+    dir = ["^", ">", "v", "<"]
+    cost = {
+        "^^": 1,
+        ">>": 1,
+        "vv": 1,
+        "<<": 1,
+        "^>": 1001,
+        ">v": 1001,
+        "v<": 1001,
+        "<^": 1001,
+        "^v": 2001,
+        "v^": 2001,
+        "<>": 2001,
+        "><": 2001,
+        "^<": 3001,
+        "<v": 3001,
+        "v>": 3001,
+        ">^": 3001
+    }
     s, e = None, None
     for y, line in enumerate(lines):
         for x, char in enumerate(line):
@@ -26,27 +45,39 @@ def part1(lines):
                 s = node_key
             elif lines[y][x] == "E":
                 e = node_key
-            nodes[node_key] = []
-            if x > 0 and line[x-1] != "#":
-                nodes[node_key].append((f"{x-1},{y}", 1))
-            if y > 0 and lines[y-1][x] != "#":
-                nodes[node_key].append((f"{x},{y-1}", 1))
-            if x < len(line)-1 and line[x+1] != "#":
-                nodes[node_key].append((f"{x+1},{y}", 1))
-            if y < len(lines)-1 and lines[y+1][x] != "#":
-                nodes[node_key].append((f"{x},{y+1}", 1))
+            for d_s in dir:
+                node_key = f"{x},{y},{d_s}"
+                nodes[node_key] = []
+                if x > 0 and line[x-1] != "#":
+                    for d_d in dir:
+                        left_key = f"{x-1},{y},{d_d}"
+                        nodes[node_key].append((left_key, cost[f"{d_s}{d_d}"]))
+                if y > 0 and lines[y-1][x] != "#":
+                    for d_d in dir:
+                        up_key = f"{x},{y-1},{d_d}"
+                        nodes[node_key].append((up_key, cost[f"{d_s}{d_d}"]))
+                if x < len(line)-1 and line[x+1] != "#":
+                    for d_d in dir:
+                        right_key = f"{x+1},{y},{d_d}"
+                        nodes[node_key].append((right_key, cost[f"{d_s}{d_d}"]))
+                if y < len(lines)-1 and lines[y+1][x] != "#":
+                    for d_d in dir:
+                        down_key = f"{x},{y+1},{d_d}"
+                        nodes[node_key].append((down_key, cost[f"{d_s}{d_d}"]))
 
-    astar = CustomAStar(nodes, use_adminissible_heuristic=True)
+    astar = CustomAStar(nodes, use_adminissible_heuristic=False)
 
-    start = s
-    end = e
+    start = f"{s},>"
+    end = f"{e},^"
     path = list(astar.astar(start, end))
 
-    print_path(lines, path)
+    #print_path(lines, path)
 
     #print(path)
 
     return len(path) - 1
+
+
 
 def part2(lines):
     return 4
