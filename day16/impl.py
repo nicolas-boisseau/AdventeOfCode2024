@@ -41,7 +41,9 @@ def part1(lines):
 
                 # can turn for cost 1000
                 next_dir = dir[(dir.index(d_s) + 1) % 4]
+                prev_dir = dir[(dir.index(d_s) - 1) % 4]
                 nodes[node_key].append((f"{x},{y},{next_dir}", 1000))
+                nodes[node_key].append((f"{x},{y},{prev_dir}", 1000))
 
                 # can go forward for cost 1
                 if d_s == "^" and y > 0 and lines[y-1][x] != "#":
@@ -54,25 +56,30 @@ def part1(lines):
                     nodes[node_key].append((f"{x-1},{y},{d_s}", 1))
 
 
-    astar = CustomAStar(nodes, use_adminissible_heuristic=True, part=1)
+    astar = CustomAStar(nodes, use_adminissible_heuristic=False)
 
     start = f"{s},>"
-    end = f"{e},^"
-    path = list(astar.astar(start, end))
+    possibles_ends = [f"{e},^", f"{e},>", f"{e},v", f"{e},<"]
+    possibles_scores = []
+    for end in possibles_ends:
+        path = list(astar.astar(start, end))
+        possibles_scores += [score_path(nodes, path)]
 
-    print_path(lines, path)
+    #print_path(lines, path)
 
-    print(path)
+    #print(path)
+
+    return min(possibles_scores)
+
+def score_path(nodes, path):
     score = 0
-    for i in range(len(path)-1):
+    for i in range(len(path) - 1):
         next = nodes[path[i]]
         for n in next:
-            if n[0] == path[i+1]:
+            if n[0] == path[i + 1]:
                 score += n[1]
                 break
     return score
-
-
 
 def part2(lines):
     return 4
@@ -81,7 +88,7 @@ def part2(lines):
 if __name__ == '__main__':
 
     part = 1
-    expectedSampleResult = -1
+    expectedSampleResult = 7036
 
     part_func = part1 if part == 1 else part2
     if part_func(read_input_lines("sample.txt")) == expectedSampleResult:
