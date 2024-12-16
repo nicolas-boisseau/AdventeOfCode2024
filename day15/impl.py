@@ -212,16 +212,17 @@ def part2(lines):
     for m in moves:
         #print(f"Move {m}")
         backup_grid = deep_copy_grid(new_grid)
-        if i == 3218:
-            print(f"About to move {m}, at iteration {i}")
-            #print_grid(new_grid)
+        # if i == 3218:
+        #     print(f"About to move {m}, at iteration {i}")
+        #     print_grid(new_grid)
 
         x, y = find_robot_position(new_grid)
         try_move_robot2(m, x, y, new_grid)
         if detect_malformed_grid(new_grid):
-            print(f"Malformed grid after move {i}")
+            #print(f"Malformed grid after move {i}")
             #print_grid(new_grid)
             new_grid = backup_grid
+            #eturn -1
         i += 1
         #print_grid(new_grid)
 
