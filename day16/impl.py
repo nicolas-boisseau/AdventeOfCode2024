@@ -25,6 +25,25 @@ def print_path(lines, path):
 
 
 def part1(lines):
+    nodes, e, s = extract_nodes_and_e_s(lines)
+
+    astar = CustomAStar(nodes, use_adminissible_heuristic=False)
+
+    start = f"{s},>"
+    possibles_ends = [f"{e},^", f"{e},>", f"{e},v", f"{e},<"]
+    possibles_scores = []
+    for end in possibles_ends:
+        path = list(astar.astar(start, end))
+        possibles_scores += [score_path(nodes, path)]
+
+    #print_path(lines, path)
+
+    #print(path)
+
+    return min(possibles_scores)
+
+
+def extract_nodes_and_e_s(lines):
     nodes = {}
     dir = ["^", ">", "v", "<"]
     s, e = None, None
@@ -46,30 +65,16 @@ def part1(lines):
                 nodes[node_key].append((f"{x},{y},{prev_dir}", 1000))
 
                 # can go forward for cost 1
-                if d_s == "^" and y > 0 and lines[y-1][x] != "#":
-                    nodes[node_key].append((f"{x},{y-1},{d_s}", 1))
-                elif d_s == ">" and x < len(lines[y])-1 and lines[y][x+1] != "#":
-                    nodes[node_key].append((f"{x+1},{y},{d_s}", 1))
-                elif d_s == "v" and y < len(lines)-1 and lines[y+1][x] != "#":
-                    nodes[node_key].append((f"{x},{y+1},{d_s}", 1))
-                elif d_s == "<" and x > 0 and lines[y][x-1] != "#":
-                    nodes[node_key].append((f"{x-1},{y},{d_s}", 1))
+                if d_s == "^" and y > 0 and lines[y - 1][x] != "#":
+                    nodes[node_key].append((f"{x},{y - 1},{d_s}", 1))
+                elif d_s == ">" and x < len(lines[y]) - 1 and lines[y][x + 1] != "#":
+                    nodes[node_key].append((f"{x + 1},{y},{d_s}", 1))
+                elif d_s == "v" and y < len(lines) - 1 and lines[y + 1][x] != "#":
+                    nodes[node_key].append((f"{x},{y + 1},{d_s}", 1))
+                elif d_s == "<" and x > 0 and lines[y][x - 1] != "#":
+                    nodes[node_key].append((f"{x - 1},{y},{d_s}", 1))
+    return nodes, e, s
 
-
-    astar = CustomAStar(nodes, use_adminissible_heuristic=False)
-
-    start = f"{s},>"
-    possibles_ends = [f"{e},^", f"{e},>", f"{e},v", f"{e},<"]
-    possibles_scores = []
-    for end in possibles_ends:
-        path = list(astar.astar(start, end))
-        possibles_scores += [score_path(nodes, path)]
-
-    #print_path(lines, path)
-
-    #print(path)
-
-    return min(possibles_scores)
 
 def score_path(nodes, path):
     score = 0
