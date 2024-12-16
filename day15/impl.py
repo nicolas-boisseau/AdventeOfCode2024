@@ -1,4 +1,5 @@
 import os.path
+from copy import deepcopy
 
 from common.common import download_input_if_not_exists, post_answer, capture, capture_all, read_input_lines
 
@@ -135,14 +136,20 @@ def push_robot_in_direction2(x, y, dx, dy, grid, visited):
     can_move, (nx, ny) = is_place_free_in_direction2(x, y, dx, dy, grid, visited)
     if not can_move:
         return
+    can_move = is_place_free_in_direction2(x, y, dx, dy, grid, visited)
+    can_move_r, _ = is_place_free_in_direction2(x + 1, y, dx, dy, grid, visited)
+    can_move_l, _ = is_place_free_in_direction2(x - 1, y, dx, dy, grid, visited)
+    if dx == 0 and (not can_move or ((grid[y][x] == "[" and not can_move_r) or (grid[y][x] == "]" and not can_move_l))):
+        return
     cur_x, cur_y = (nx, ny)
     dnx, dny = reversed_dir[(dx, dy)]
     while not (cur_x, cur_y) == (x, y):
         visited.add((cur_x, cur_y))
         to_move_val = grid[cur_y+dny][cur_x+dnx]
+        can_move = is_place_free_in_direction2(cur_x + dnx, cur_y + dny, dx, dy, grid, visited)
         can_move_r, _ = is_place_free_in_direction2(cur_x + dnx + 1, cur_y + dny, dx, dy, grid, visited)
         can_move_l, _ = is_place_free_in_direction2(cur_x + dnx - 1, cur_y + dny, dx, dy, grid, visited)
-        if dnx == 0 and (to_move_val == "[" and not can_move_r) or (to_move_val == "]" and not can_move_l):
+        if dnx == 0 and (not can_move or ((to_move_val == "[" and not can_move_r) or (to_move_val == "]" and not can_move_l))):
             return
         prev_val = grid[cur_y][cur_x]
         grid[cur_y][cur_x] = to_move_val
@@ -178,15 +185,44 @@ def score_grid2(grid):
                 score += x + y * 100
     return score
 
+def detect_malformed_grid(grid):
+    for y in range(len(grid)):
+        for x in range(len(grid[y])):
+            if grid[y][x] in ["[", "]"]:
+                if grid[y][x] == "[":
+                    if grid[y][x+1] != "]":
+                        return True
+                if grid[y][x] == "]":
+                    if grid[y][x-1] != "[":
+                        return True
+    return False
+
+def deep_copy_grid(grid):
+    new_grid = []
+    for y in range(len(grid)):
+        new_grid.append(grid[y].copy())
+    return new_grid
+
 def part2(lines):
     grid, moves = extract_grid_and_moves(lines)
     new_grid = elarge_width_grid(grid)
     #print_grid(new_grid)
 
+    i=0
     for m in moves:
         #print(f"Move {m}")
+        backup_grid = deep_copy_grid(new_grid)
+        if i == 3218:
+            print(f"About to move {m}, at iteration {i}")
+            #print_grid(new_grid)
+
         x, y = find_robot_position(new_grid)
         try_move_robot2(m, x, y, new_grid)
+        if detect_malformed_grid(new_grid):
+            print(f"Malformed grid after move {i}")
+            #print_grid(new_grid)
+            new_grid = backup_grid
+        i += 1
         #print_grid(new_grid)
 
     print_grid(new_grid)
