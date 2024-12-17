@@ -86,8 +86,89 @@ def score_path(nodes, path):
                 break
     return score
 
+
+def try_to_reach_end(e, nodes, start):
+    astar = CustomAStar(nodes, use_adminissible_heuristic=False)
+
+    possibles_ends = [f"{e},^", f"{e},>", f"{e},v", f"{e},<"]
+    possibles_scores = []
+    best_path = None
+    best_score = 9999999999999999999999999999999
+    for end in possibles_ends:
+        path = list(astar.astar(start, end))
+        score = score_path(nodes, path)
+        if score < best_score:
+            best_score = score
+            best_path = path
+    return best_path, best_score
+
 def part2(lines):
-    return 4
+    nodes, end_pos, start_pos = extract_nodes_and_e_s(lines)
+    mdir = {
+        "^": (-1, 0),
+        ">": (0, 1),
+        "v": (1, 0),
+        "<": (0, -1)
+    }
+    alldir = ["^", ">", "v", "<"]
+
+    s_x,s_y = start_pos.split(",")
+    start = f"{start_pos},>"
+    best_path, best_score = try_to_reach_end(end_pos, nodes, start)
+
+    best_nodes = {}
+    for n in best_path:
+        n_x,n_y,n_d = n.split(",")
+        best_nodes[f"{n_x},{n_y}"] = n_d
+
+    def print_best_nodes():
+        for y in range(len(lines)):
+            for x in range(len(lines[y])):
+                if f"{x},{y}" in best_nodes:
+                    print("O", end="")
+                else:
+                    print(lines[y][x], end="")
+            print()
+
+    remaining = best_path.copy()
+    while len(remaining) > 0:
+        next_best = remaining.pop(0)
+        n_x,n_y,n_d = next_best.split(",")
+        # next_variations = [f"{n_x},{n_y},{d}" for d in ["^", ">", "v", "<"] if d != n_d]
+        next_variations = []
+        dir = mdir[n_d]
+        if lines[int(n_y)+dir[0]][int(n_x)+dir[1]] == ".": # can move forward
+            next_variations.append((f"{int(n_x)+dir[1]},{int(n_y)+dir[0]},{n_d}", 1))
+        else:
+            next_dir = alldir[(alldir.index(n_d) + 1) % 4]
+            next_dir_v = mdir[next_dir]
+            prev_dir = alldir[(alldir.index(n_d) - 1) % 4]
+            prev_dir_v = mdir[prev_dir]
+            if lines[int(n_y) + next_dir_v[0]][int(n_x) + next_dir_v[1]] == ".":  # turn right
+                next_variations.append((f"{int(n_x) + next_dir_v[1]},{int(n_y) + next_dir_v[0]},{n_d}", 1000))
+            if lines[int(n_y) + prev_dir_v[0]][int(n_x) + prev_dir_v[1]] == ".":  # turn left
+                next_variations.append((f"{int(n_x) + prev_dir_v[1]},{int(n_y) + prev_dir_v[0]},{n_d}", 1000))
+
+        _, best_score = try_to_reach_end(end_pos, nodes, next_best)
+        for (v,d) in next_variations:
+            sub_path, score = try_to_reach_end(end_pos, nodes, v)
+            if score+d <= best_score:
+                for n in sub_path:
+                    n_x, n_y, n_d = n.split(",")
+                    best_nodes[f"{n_x},{n_y}"] = n_d
+
+        #print_best_nodes()
+    print_best_nodes()
+
+    # print_path(lines, path)
+
+    # print(path)
+
+
+
+    return len(best_nodes)
+
+
 
 
 if __name__ == '__main__':
