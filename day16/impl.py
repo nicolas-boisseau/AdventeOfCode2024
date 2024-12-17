@@ -105,10 +105,10 @@ def try_to_reach_end(e, nodes, start):
 def part2(lines):
     nodes, end_pos, start_pos = extract_nodes_and_e_s(lines)
     mdir = {
-        "^": (-1, 0),
-        ">": (0, 1),
-        "v": (1, 0),
-        "<": (0, -1)
+        "^": (0,-1),
+        ">": (1, 0),
+        "v": (0, 1),
+        "<": (-1, 0)
     }
     alldir = ["^", ">", "v", "<"]
 
@@ -134,7 +134,7 @@ def part2(lines):
     while len(remaining) > 0:
         next_best = remaining.pop(0)
         n_x,n_y,n_d = next_best.split(",")
-        # next_variations = [f"{n_x},{n_y},{d}" for d in ["^", ">", "v", "<"] if d != n_d]
+        next_variations = [f"{n_x},{n_y},{d}" for d in ["^", ">", "v", "<"] if d != n_d]
         next_variations = []
         dir = mdir[n_d]
         if lines[int(n_y)+dir[0]][int(n_x)+dir[1]] == ".": # can move forward
@@ -145,14 +145,14 @@ def part2(lines):
             prev_dir = alldir[(alldir.index(n_d) - 1) % 4]
             prev_dir_v = mdir[prev_dir]
             if lines[int(n_y) + next_dir_v[0]][int(n_x) + next_dir_v[1]] == ".":  # turn right
-                next_variations.append((f"{int(n_x) + next_dir_v[1]},{int(n_y) + next_dir_v[0]},{n_d}", 1000))
+                next_variations.append((f"{int(n_x) + next_dir_v[1]},{int(n_y) + next_dir_v[0]},{next_dir}", 1000))
             if lines[int(n_y) + prev_dir_v[0]][int(n_x) + prev_dir_v[1]] == ".":  # turn left
-                next_variations.append((f"{int(n_x) + prev_dir_v[1]},{int(n_y) + prev_dir_v[0]},{n_d}", 1000))
+                next_variations.append((f"{int(n_x) + prev_dir_v[1]},{int(n_y) + prev_dir_v[0]},{prev_dir}", 1000))
 
         _, best_score = try_to_reach_end(end_pos, nodes, next_best)
         for (v,d) in next_variations:
             sub_path, score = try_to_reach_end(end_pos, nodes, v)
-            if score+d <= best_score:
+            if score <= best_score:
                 for n in sub_path:
                     n_x, n_y, n_d = n.split(",")
                     best_nodes[f"{n_x},{n_y}"] = n_d
