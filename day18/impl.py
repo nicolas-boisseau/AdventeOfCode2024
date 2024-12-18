@@ -39,14 +39,25 @@ def part1(lines, w, h, max_steps):
     start = "0,0"
     end = f"{w},{h}"
 
-    path = list(astar.astar(start, end))
+    res = astar.astar(start, end)
+    if res is None:
+        return None
+    path = list(res)
 
     return len(path) - 1
 
 
 
-def part2(lines):
-    return 4
+def part2(lines, w, h, start_at_step):
+
+     i = start_at_step
+     res = part1(lines, w, h, i)
+     i+=1
+     while res is not None:
+        res = part1(lines, w, h, i)
+        i += 1
+
+     return lines[i-2]
 
 
 if __name__ == '__main__':
