@@ -29,54 +29,87 @@ def get_combo(literal, regA, regB, regC):
 
 def part1(lines):
     regA, regB, regC, prog_entries = extract_reg_and_prog(lines)
-    instr_pointer = 0
 
-    output = []
-
-    while instr_pointer < len(prog_entries):
-
-        instr = prog_entries[instr_pointer]
-        literal = prog_entries[instr_pointer + 1]
-
-        if instr == 0: # adv - division regA / combo^2
-            numerator = regA
-            combo = get_combo(literal, regA, regB, regC)
-            denominator = math.pow(2, combo)
-            regA = int(numerator / denominator)
-        elif instr == 1: # bxl bitwise XOR regB and literal
-            regB = regB ^ literal
-        elif instr == 2: # bst combo%8
-            combo = get_combo(literal, regA, regB, regC)
-            regB = combo % 8
-        elif instr == 3: # jnz nothing if regA == 0 else jump to combo
-            if regA != 0:
-                instr_pointer = prog_entries[instr_pointer + 1]
-                continue
-        elif instr == 4: # bxc XOR regB and regC => regB
-            regB = regB ^ regC
-        elif instr == 5: # out -
-            combo = get_combo(literal, regA, regB, regC)
-            output.append(combo%8)
-        elif instr == 6: # bdv - like adv but store in regB
-            numerator = regA
-            combo = get_combo(literal, regA, regB, regC)
-            denominator = math.pow(2, combo)
-            regB = int(numerator / denominator)
-        elif instr == 7: # cdv - like adv but store in regC
-            numerator = regA
-            combo = get_combo(literal, regA, regB, regC)
-            denominator = math.pow(2, combo)
-            regC = int(numerator / denominator)
-
-        instr_pointer += 2
+    output = execute(prog_entries, regA, regB, regC)
 
     print(output)
     output_str = ",".join([str(i) for i in output])
     print(output_str)
     return output_str
 
+
+def execute(prog_entries, regA, regB, regC):
+    instr_pointer = 0
+    output = []
+    while instr_pointer < len(prog_entries):
+
+        instr = prog_entries[instr_pointer]
+        literal = prog_entries[instr_pointer + 1]
+
+        if instr == 0:  # adv - division regA / combo^2
+            numerator = regA
+            combo = get_combo(literal, regA, regB, regC)
+            denominator = math.pow(2, combo)
+            regA = int(numerator / denominator)
+        elif instr == 1:  # bxl bitwise XOR regB and literal
+            regB = regB ^ literal
+        elif instr == 2:  # bst combo%8
+            combo = get_combo(literal, regA, regB, regC)
+            regB = combo % 8
+        elif instr == 3:  # jnz nothing if regA == 0 else jump to combo
+            if regA != 0:
+                instr_pointer = prog_entries[instr_pointer + 1]
+                continue
+        elif instr == 4:  # bxc XOR regB and regC => regB
+            regB = regB ^ regC
+        elif instr == 5:  # out -
+            combo = get_combo(literal, regA, regB, regC)
+            output.append(combo % 8)
+        elif instr == 6:  # bdv - like adv but store in regB
+            numerator = regA
+            combo = get_combo(literal, regA, regB, regC)
+            denominator = math.pow(2, combo)
+            regB = int(numerator / denominator)
+        elif instr == 7:  # cdv - like adv but store in regC
+            numerator = regA
+            combo = get_combo(literal, regA, regB, regC)
+            denominator = math.pow(2, combo)
+            regC = int(numerator / denominator)
+
+        instr_pointer += 2
+    return output
+
+
+def reverse_execute(prog_entries, regB, regC):
+    regA = None
+    expected_outputs = prog_entries
+
+    for i in range(len(expected_outputs)-1, 0, -1):
+
+        o = expected_outputs[i]
+    return regA
+
+
 def part2(lines):
-    return 4
+    regA, regB, regC, prog_entries = extract_reg_and_prog(lines)
+    output = []
+
+    i = 0
+    while output != prog_entries:
+        #print(f"Trying {i}")
+        output = execute(prog_entries, i, regB, regC)
+        #print(output)
+        if len(output) < len(prog_entries):
+            i *= 10
+        if output[len(prog_entries):] != prog_entries[len(output):]:
+            i *= 6
+        # if i == 117440:
+        #     print(output)
+        #     print(f"Expected: {prog_entries}")
+        i+=1
+
+    return i-1
+    #return reverse_execute(prog_entries, regB, regC)
 
 
 if __name__ == '__main__':
