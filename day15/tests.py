@@ -23,8 +23,7 @@ class AdventOfCodeTests(unittest.TestCase):
 
     def test_part2_input(self):
         # not 1473493
-        self.assertNotEqual(1473493, part2(read_input_lines("input.txt")))
-        self.assertEqual(4, part2(read_input_lines("input.txt")))
+        self.assertEqual(1467145, part2(read_input_lines("input.txt")))
 
 
 if __name__ == '__main__':

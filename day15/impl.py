@@ -115,56 +115,84 @@ def elarge_width_grid(grid):
 
     return new_grid
 
-def is_place_free_in_direction2(x, y, dx, dy, grid, visited):
-    while y >= 0 and x >= 0 and y < len(grid) and x < len(grid[y]) and grid[y][x] != "#":
-        if grid[y][x] in ["."]:
-            return True, (x, y)
-        x += dx
-        y += dy
-    return False, (-1, -1)
 
-def push_robot_in_direction2(x, y, dx, dy, grid, visited):
-    reversed_dir = {
-        (1, 0): (-1,0),
-        (-1, 0): (1,0),
-        (0, 1): (0,-1),
-        (0, -1): (0,1)
-    }
-    if (x, y) in visited:
-        return
-    visited.add((x, y))
-    can_move, (nx, ny) = is_place_free_in_direction2(x, y, dx, dy, grid, visited)
-    if not can_move:
-        return
-    can_move = is_place_free_in_direction2(x, y, dx, dy, grid, visited)
-    can_move_r, _ = is_place_free_in_direction2(x + 1, y, dx, dy, grid, visited)
-    can_move_l, _ = is_place_free_in_direction2(x - 1, y, dx, dy, grid, visited)
-    if dx == 0 and (not can_move or ((grid[y][x] == "[" and not can_move_r) or (grid[y][x] == "]" and not can_move_l))):
-        return
-    cur_x, cur_y = (nx, ny)
-    dnx, dny = reversed_dir[(dx, dy)]
-    while not (cur_x, cur_y) == (x, y):
-        visited.add((cur_x, cur_y))
-        to_move_val = grid[cur_y+dny][cur_x+dnx]
-        can_move = is_place_free_in_direction2(cur_x + dnx, cur_y + dny, dx, dy, grid, visited)
-        can_move_r, _ = is_place_free_in_direction2(cur_x + dnx + 1, cur_y + dny, dx, dy, grid, visited)
-        can_move_l, _ = is_place_free_in_direction2(cur_x + dnx - 1, cur_y + dny, dx, dy, grid, visited)
-        if dnx == 0 and (not can_move or ((to_move_val == "[" and not can_move_r) or (to_move_val == "]" and not can_move_l))):
-            return
-        prev_val = grid[cur_y][cur_x]
-        grid[cur_y][cur_x] = to_move_val
-        grid[cur_y + dny][cur_x + dnx] = prev_val
+def is_position_movable(x, y, dx, dy, grid, is_call_from_inside=False):
+    if dx==0 and grid[y][x] == "@":
+        can_move, to_move = is_position_movable(x+dx, y+dy, dx, dy, grid)
+        return can_move, [(x,y)] + to_move
+    if dx==0 and grid[y][x] == "[":
+        u_x = x+dx
+        u_y = y+dy
+        under = grid[u_y][u_x]
+        to_move = [(x,y)]
+        if under == ".":
+            under_is_free = True
+        elif under == "#":
+            under_is_free = False
+        else:
+            # check under
+            under_is_free, u_to_move = is_position_movable(u_x, u_y, dx, dy, grid)
+            to_move += u_to_move
 
-        if to_move_val == "[" and dnx == 0:
-            # need to move also his brother "]"
-            push_robot_in_direction2(cur_x + dnx + 1, cur_y + dny, dx, dy, grid, visited)
+        if is_call_from_inside:
+            return under_is_free, to_move
+        r_x = x+1
+        r_y = y
+        right_is_movable, r_to_move = is_position_movable(r_x, r_y, dx, dy, grid, is_call_from_inside=True)
+        to_move += r_to_move
 
-        elif to_move_val == "]" and dnx == 0:
-            # need to move also his brother "["
-            push_robot_in_direction2(cur_x + dnx - 1, cur_y + dny, dx, dy, grid, visited)
+        return under_is_free and right_is_movable, to_move
+    elif dx==0 and grid[y][x] == "]":
+        u_x = x+dx
+        u_y = y+dy
+        under = grid[u_y][u_x]
+        to_move = [(x,y)]
+        if under == ".":
+            under_is_free = True
+        elif under == "#":
+            under_is_free = False
+        else:
+            # check under
+            under_is_free, u_to_move = is_position_movable(u_x, u_y, dx, dy, grid)
+            to_move += u_to_move
 
-        cur_x += dnx
-        cur_y += dny
+        if is_call_from_inside:
+            return under_is_free, to_move
+        l_x = x-1
+        l_y = y
+        left_is_movable, l_to_move = is_position_movable(l_x, l_y, dx, dy, grid, is_call_from_inside=True)
+        to_move += l_to_move
+
+        return under_is_free and left_is_movable, to_move
+    else:
+        to_move = []
+        while y >= 0 and x >= 0 and y < len(grid) and x < len(grid[y]) and grid[y][x] != "#":
+            if grid[y][x] in ["."]:
+                return True, to_move
+            to_move += [(x,y)]
+            x += dx
+            y += dy
+        return False, []
+
+
+def remove_duplicates(array):
+    return list(set(array))
+
+def push_robot_in_direction2(x, y, dx, dy, grid):
+
+    can_move, to_move = is_position_movable(x, y, dx, dy, grid)
+    to_move = remove_duplicates(to_move)
+    if can_move:
+        if dx != 0:
+            to_move.sort(key=lambda x: x[0], reverse=dx == 1)
+        else:
+            to_move.sort(key=lambda y: y[1], reverse=dy == 1)
+        for (xx, yy) in to_move:
+            to_move_val = grid[yy][xx]
+            new_move_val = grid[yy+dy][xx+dx]
+            grid[yy][xx] = new_move_val
+            grid[yy+dy][xx+dx] = to_move_val
+
 
 def try_move_robot2(m_dir, x, y, grid):
     dir = {
@@ -174,7 +202,7 @@ def try_move_robot2(m_dir, x, y, grid):
         "v": (0, 1)
     }
     dx, dy = dir[m_dir]
-    push_robot_in_direction2(x, y, dx, dy, grid, set())
+    push_robot_in_direction2(x, y, dx, dy, grid)
 
 
 def score_grid2(grid):
@@ -210,22 +238,19 @@ def part2(lines):
 
     i=0
     for m in moves:
-        #print(f"Move {m}")
-        backup_grid = deep_copy_grid(new_grid)
-        if i == 3218:
-            print(f"About to move {m}, at iteration {i}")
-            #print_grid(new_grid)
+        #print(f"About to move {m}")
+        #print_grid(new_grid)
 
         x, y = find_robot_position(new_grid)
         try_move_robot2(m, x, y, new_grid)
         if detect_malformed_grid(new_grid):
             print(f"Malformed grid after move {i}")
-            #print_grid(new_grid)
-            new_grid = backup_grid
+            print_grid(new_grid)
+            return -1
         i += 1
         #print_grid(new_grid)
 
-    print_grid(new_grid)
+    #print_grid(new_grid)
     return score_grid2(new_grid)
 
 
