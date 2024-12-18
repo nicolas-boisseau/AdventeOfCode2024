@@ -34,7 +34,7 @@ def part1(lines, w, h, max_steps):
                     if g[y+dy][x+dx] != "#":
                         nodes[node_key].append((f"{x+dx},{y+dy}", 1))
 
-    astar = CustomAStar(nodes, use_adminissible_heuristic=False)
+    astar = CustomAStar(nodes)
 
     start = "0,0"
     end = f"{w},{h}"
