@@ -56,7 +56,7 @@ def execute(prog_entries, regA, regB, regC):
         elif instr == 2:  # bst combo%8
             combo = get_combo(literal, regA, regB, regC)
             regB = combo % 8
-        elif instr == 3:  # jnz nothing if regA == 0 else jump to combo
+        elif instr == 3:  # jnz nothing if regA == 0 else jump to literal
             if regA != 0:
                 instr_pointer = prog_entries[instr_pointer + 1]
                 continue
@@ -64,7 +64,8 @@ def execute(prog_entries, regA, regB, regC):
             regB = regB ^ regC
         elif instr == 5:  # out -
             combo = get_combo(literal, regA, regB, regC)
-            output.append(combo % 8)
+            o = combo % 8
+            output.append(o)
         elif instr == 6:  # bdv - like adv but store in regB
             numerator = regA
             combo = get_combo(literal, regA, regB, regC)
@@ -79,37 +80,36 @@ def execute(prog_entries, regA, regB, regC):
         instr_pointer += 2
     return output
 
+def reverse(prog_entries, aggr=0, index=-99):
+    if index == -99:
+        # start with last output
+        index = len(prog_entries) - 1
 
-def reverse_execute(prog_entries, regB, regC):
-    regA = None
-    expected_outputs = prog_entries
+    if index < 0:
+        return aggr
 
-    for i in range(len(expected_outputs)-1, 0, -1):
+    current_entry = prog_entries[index]
 
-        o = expected_outputs[i]
-    return regA
+    for i in range(8):
+        to_test = aggr * 8 + i
 
+        out = execute(prog_entries[:-2], to_test, 0, 0)[0]
+
+        if out == current_entry:
+            next = reverse(prog_entries, to_test, index-1)
+            if next is not None:
+                return next
+
+    return None
 
 def part2(lines):
-    regA, regB, regC, prog_entries = extract_reg_and_prog(lines)
-    output = []
+    _, _, _, prog_entries = extract_reg_and_prog(lines)
 
-    i = 0
-    while output != prog_entries:
-        #print(f"Trying {i}")
-        output = execute(prog_entries, i, regB, regC)
-        #print(output)
-        if len(output) < len(prog_entries):
-            i *= 10
-        if output[len(prog_entries):] != prog_entries[len(output):]:
-            i *= 6
-        # if i == 117440:
-        #     print(output)
-        #     print(f"Expected: {prog_entries}")
-        i+=1
+    regA = reverse(prog_entries)
 
-    return i-1
-    #return reverse_execute(prog_entries, regB, regC)
+    if execute(prog_entries, regA, 0, 0) == prog_entries:
+        print("FOUND")
+    return regA
 
 
 if __name__ == '__main__':

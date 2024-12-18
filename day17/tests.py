@@ -1,6 +1,7 @@
 import unittest
 
 from common.common import read_input_lines
+from day17.impl import execute, extract_reg_and_prog
 from impl import part1, part2
 
 
@@ -18,8 +19,7 @@ class AdventOfCodeTests(unittest.TestCase):
         self.assertEqual(117440, part2(read_input_lines("sample2.txt")))
 
     def test_part2_input(self):
-        self.assertEqual(4, part2(read_input_lines("input.txt")))
-
+        self.assertEqual(105734774294938, part2(read_input_lines("input.txt")))
 
 if __name__ == '__main__':
     unittest.main()
