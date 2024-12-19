@@ -1,4 +1,5 @@
 import os.path
+from functools import lru_cache
 
 from common.common import download_input_if_not_exists, post_answer, capture, capture_all, read_input_lines
 
@@ -20,6 +21,7 @@ def extract_patterns_and_designs(lines):
 #             g[pattern].append(next_pattern)
 #     return g
 
+@lru_cache(maxsize=None)
 def get_possible_next_patterns(design, patterns):
     possible_next_patterns = []
     for pattern in patterns:
@@ -36,6 +38,7 @@ def try_design(design, patterns):
             return True
     return False
 
+@lru_cache(maxsize=None)
 def try_design_rec(design, patterns, nb=0):
     if len(design) == 0:
         return nb+1
@@ -53,7 +56,7 @@ def part1(lines):
 
     nb_ok = 0
     for d in designs:
-        ok= try_design(d, patterns)
+        ok= try_design(d, tuple(patterns))
         print(f"{d} : {ok}")
         if ok:
             nb_ok += 1
@@ -65,10 +68,11 @@ def part2(lines):
 
     nb_ok = 0
     for d in designs:
-        nb = try_design_rec(d, patterns)
-        print(f"{d} : {nb > 0} ({nb})")
-        if nb > 0:
-            nb_ok += nb
+        if try_design(d, tuple(patterns)):
+            nb = try_design_rec(d, tuple(patterns))
+            #print(f"{d} : {nb > 0} ({nb})")
+            if nb > 0:
+                nb_ok += nb
 
     return nb_ok
 
