@@ -12,16 +12,6 @@ def extract_patterns_and_designs(lines):
         designs.append(lines[i])
     return patterns, designs
 
-# def create_pattern_graph(patterns):
-#     g = {}
-#     for pattern in patterns:
-#         for next_pattern in patterns:
-#             if pattern not in g.keys():
-#                 g[pattern] = []
-#             g[pattern].append(next_pattern)
-#     return g
-
-@lru_cache(maxsize=None)
 def get_possible_next_patterns(design, patterns):
     possible_next_patterns = []
     for pattern in patterns:
@@ -39,20 +29,20 @@ def try_design(design, patterns):
     return False
 
 @lru_cache(maxsize=None)
-def try_design_rec(design, patterns, nb=0):
-    if len(design) == 0:
-        return nb+1
+def try_design_rec(design, patterns):
+    if design in patterns:
+        nb= 1
+    else:
+        nb=0
     possible_next_patterns = get_possible_next_patterns(design, patterns)
     for next_pattern in possible_next_patterns:
-        nb = try_design_rec(design[len(next_pattern):], patterns, nb)
+        nb += try_design_rec(design[len(next_pattern):], patterns)
 
     return nb
 
 
 def part1(lines):
     patterns, designs = extract_patterns_and_designs(lines)
-
-    #g = create_pattern_graph(patterns)
 
     nb_ok = 0
     for d in designs:
@@ -68,9 +58,10 @@ def part2(lines):
 
     nb_ok = 0
     for d in designs:
+        # don't compute already known as false...
         if try_design(d, tuple(patterns)):
             nb = try_design_rec(d, tuple(patterns))
-            #print(f"{d} : {nb > 0} ({nb})")
+            print(f"{d} : {nb > 0} ({nb})")
             if nb > 0:
                 nb_ok += nb
 
