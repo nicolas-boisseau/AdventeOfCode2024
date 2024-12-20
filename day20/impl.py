@@ -46,13 +46,13 @@ def find_all(a_str, sub):
         start = a_str.find(sub, start)
         if start == -1: return
         yield start
-        start += len(sub) # use start += 1 to find overlapping matches
+        start += 1 # use start += 1 to find overlapping matches
 
 def find_possible_horizontal_cheat_positions(lines):
     horizontal_positions = []
     for y, line in enumerate(lines):
-        #positions = find_all(lines[y], ".#.")
-        positions = [m.start() for m in re.finditer(".#.", lines[y])]
+        positions = find_all(lines[y], ".#.")
+        #positions = [m.start() for m in re.finditer(".#.", lines[y])]
         for x in positions:
             horizontal_positions.append((x, y))
     return horizontal_positions
@@ -71,13 +71,13 @@ def find_possible_vertical_cheat_positions(lines):
     for x in range(len(lines[0])):
         column = "".join([line[x] for line in lines])
 
-        positions = [m.start() for m in re.finditer(".#", column)]
+        positions = find_all(column, ".#.") #[m.start() for m in re.finditer(".#.", column)]
         for y in positions:
             vertical_positions.append((x, y))
     return vertical_positions
 
 
-def part1(lines):
+def part1(lines, minimum_saving=0):
     nodes, e, s = extract_nodes_and_e_s(lines)
     lines_without_es = [line.replace("E", ".").replace("S", ".") for line in lines]
 
@@ -134,8 +134,8 @@ def part1(lines):
     for k in by_score.keys():
         print(f"{reference_score-k}: {by_score[k]}")
 
-    return len(all_possibles_scores)
-    #return sum([1 for score in all_possibles_scores if reference_score - score > 0])
+    #return len(all_possibles_scores)
+    return sum([1 for score in all_possibles_scores if reference_score - score >= minimum_saving])
 
 
 
