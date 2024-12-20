@@ -155,7 +155,7 @@ def part2(lines, minimum_saving=50):
     for i in range(len(reference_path)):
         x, y = map(int, reference_path[i].split(","))
 
-        for j in range(len(reference_path)-1, i, -1):
+        for j in range(len(reference_path)-1, 0, -1):
             if reference_path[j] == reference_path[i]:
                 break
 
