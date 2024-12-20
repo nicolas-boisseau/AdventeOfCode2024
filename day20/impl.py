@@ -1,3 +1,4 @@
+import math
 import os.path
 import re
 from collections import defaultdict
@@ -139,8 +140,59 @@ def part1(lines, minimum_saving=0):
 
 
 
-def part2(lines):
-    return 0
+
+def part2(lines, minimum_saving=50):
+    nodes, e, s = extract_nodes_and_e_s(lines)
+    free_world = [line.replace("#", ".") for line in lines]
+    free_world_nodes = extract_nodes_and_e_s(free_world)[0]
+
+    astar = CustomAStar(nodes)
+    reference_path = list(astar.astar(s, e))
+    reference_score = len(reference_path) - 1
+
+    # on avance sur le path principal et on tente de trouver des raccourcis < 20
+    all_possibles_scores = []
+    for i in range(len(reference_path)):
+        x, y = map(int, reference_path[i].split(","))
+
+        for j in range(len(reference_path)-1, i, -1):
+            if reference_path[j] == reference_path[i]:
+                break
+
+            astar_free_world = CustomAStar(free_world_nodes)
+
+            # xi,yi = map(int, reference_path[j].split(","))
+            # xj,yj = map(int, reference_path[i].split(","))
+            # distance=math.sqrt((xj-xi)**2 + (yj-yi)**2)
+            # if distance >= 20:
+            #     continue
+            # else:
+            #     # distance en prenant le path principal
+            #     d_normal_path = j - i
+            #     if distance > d_normal_path:
+            #         continue
+
+            path = list(astar_free_world.astar(reference_path[i], reference_path[j]))
+            #print(len(path))
+
+            if len(path) > 20:
+                continue
+
+            score = i + len(path) - 1 + len(reference_path) - j - 1
+            #print(score)
+            if reference_score - score >= minimum_saving:
+                all_possibles_scores.append(score)
+
+        print(i, "/", len(reference_path), len(all_possibles_scores))
+
+    # print("Possibles saves:")
+    # by_score = defaultdict(int)
+    # for s in all_possibles_scores:
+    #     by_score[s] += 1
+    # for k in by_score.keys():
+    #     print(f"{reference_score - k}: {by_score[k]}")
+
+    return sum([1 for score in all_possibles_scores if reference_score - score >= minimum_saving])
 
 
 
