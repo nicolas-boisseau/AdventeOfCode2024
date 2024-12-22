@@ -21,6 +21,7 @@ class AdventOfCodeTests(unittest.TestCase):
     def test_part2_input(self):
         # 1926 is too high
         # 1911 is too high
+        # 1855 is too low
         self.assertEqual(4, part2(read_input_lines("input.txt"))[1])
 
     def test_next_secret(self):

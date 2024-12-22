@@ -25,14 +25,14 @@ def part2(lines):
     sequences = {}
     for line in lines:
         secret = int(line)
-        s1_last_digit = int(str(secret)[-1])
         sub_sequences = {}
-        for i in range(2000-3):
+        for i in range(2000-3):  # skip last 3 secrets to avoid out of bounds
             secret2 = next_secret(secret)
             secret3 = next_secret(secret2)
             secret4 = next_secret(secret3)
             secret5 = next_secret(secret4)
 
+            s1_last_digit = int(str(secret)[-1])
             s2_last_digit = int(str(secret2)[-1])
             s3_last_digit = int(str(secret3)[-1])
             s4_last_digit = int(str(secret4)[-1])
@@ -42,11 +42,10 @@ def part2(lines):
 
             if key not in sub_sequences:
                 sub_sequences[key] = s5_last_digit
-            else:
-                sub_sequences[key] = max(sub_sequences[key], s5_last_digit)
+            # else:
+            #     sub_sequences[key] = max(sub_sequences[key], s5_last_digit)
 
             secret = secret2
-            s1_last_digit = s2_last_digit
 
         for sub_key in sub_sequences:
             if sub_key not in sequences:
@@ -57,8 +56,7 @@ def part2(lines):
         score += secret
 
     max_key = max(sequences, key=sequences.get)
-    max_v = max([sequences[key] for key in sequences])
-    return max_key, max_v
+    return max_key, sequences[max_key]
 
 
 if __name__ == '__main__':
