@@ -14,10 +14,10 @@ class AdventOfCodeTests(unittest.TestCase):
         self.assertEqual(1314, res)
 
     def test_part2_sample(self):
-        self.assertEqual(2, part2(read_input_lines("sample.txt")))
+        self.assertEqual('co,de,ka,ta', part2(read_input_lines("sample.txt")))
 
     def test_part2_input(self):
-        self.assertEqual(4, part2(read_input_lines("input.txt")))
+        self.assertEqual("bg,bu,ce,ga,hw,jw,nf,nt,ox,tj,uu,vk,wp", part2(read_input_lines("input.txt")))
 
 
 if __name__ == '__main__':
