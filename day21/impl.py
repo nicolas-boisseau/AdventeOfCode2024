@@ -4,12 +4,93 @@ from common.common import download_input_if_not_exists, post_answer, capture, ca
 
 download_input_if_not_exists(2024)
 
+def cost_to_move(from_symbol, to_symbol):
+    dist_between_symbol = {
+        "A": {
+            ">": 1,
+            "v": 2,
+            "<": 3,
+            "^": 1
+        },
+        ">": {
+            "A": 1,
+            "^": 2,
+            "v": 1,
+            "<": 2
+        },
+        "^": {
+            "A": 1,
+            ">": 2,
+            "v": 1,
+            "<": 2
+        },
+        "v": {
+            "A": 2,
+            ">": 1,
+            "^": 1,
+            "<": 1
+        },
+        "<": {
+            "A": 3,
+            ">": 2,
+            "^": 2,
+            "v": 1
+        }
+    }
+
+    dist_from = dist_between_symbol[from_symbol]
+    if to_symbol in dist_from:
+        return dist_from[to_symbol]
+    else:
+        return 0
+
+def cost_to_move_on_keypad(sequence):
+    if len(sequence) == 1:
+        return 0
+    cost = 0
+    for i in range(len(sequence) - 1):
+        cost += cost_to_move(sequence[i], sequence[i+1])
+
+    return cost
+
 #     +---+---+
 #     | ^ | A |
 # +---+---+---+
 # | < | v | > |
 # +---+---+---+
 def push_dir_keypad(target_button, initial_button_pos):
+    dist_between_symbol = {
+        "A": {
+            ">": 1,
+            "v": 2,
+            "<": 3,
+            "^": 1
+        },
+        ">": {
+            "A": 1,
+            "^": 2,
+            "v": 1,
+            "<": 2
+        },
+        "^": {
+            "A": 1,
+            ">": 2,
+            "v": 1,
+            "<": 2
+        },
+        "v": {
+            "A": 2,
+            ">": 1,
+            "^": 1,
+            "<": 1
+        },
+        "<": {
+            "A": 3,
+            ">": 2,
+            "^": 2,
+            "v": 1
+        }
+    }
     to_a = {
         ">": "^",
         "^": ">",
@@ -51,7 +132,10 @@ def push_dir_keypad(target_button, initial_button_pos):
 
     if target_button == initial_button_pos:
         return "A"
-    return go_to[target_button][initial_button_pos] + "A"
+
+    go_to_code = go_to[target_button][initial_button_pos]
+
+    return optimize(go_to_code) + "A"
 
 # +---+---+---+
 # | 7 | 8 | 9 |
@@ -211,8 +295,17 @@ def push_numeric_keypad(target_button, initial_button_pos):
 
     if target_button == initial_button_pos:
         return ""
-    return go_to[target_button][initial_button_pos] + "A"
 
+    go_to_code = go_to[target_button][initial_button_pos]
+
+    return optimize(go_to_code) + "A"
+
+def optimize(code):
+    if code == "":
+        return code
+    combinations = all_combinations(code)
+    costby_comb = {c: cost_to_move_on_keypad(c) for c in combinations}
+    return min(costby_comb, key=costby_comb.get)
 
 def get_numeric_part(code):
     return int("".join([c for c in code if c.isdigit()]))
@@ -226,8 +319,8 @@ def all_combinations(str):
     return [str[0] + s for s in all_combinations(str[1:])] + [str[0] + s for s in all_combinations(str[1:])[::-1]]
 
 def part1(lines):
-
-    for code in lines[:1]:
+    score = 0
+    for code in lines:
         pos = "A"
         first_robot_all_moves = ""
         for c in code:
@@ -237,20 +330,53 @@ def part1(lines):
             pos = c
         print("first robot:", first_robot_all_moves)
 
+        # optimize before other robot
+        # optimized = ""
+        # current_code = ""
+        # for i in range(len(first_robot_all_moves)):
+        #     current = first_robot_all_moves[i]
+        #     if current != "A":
+        #         current_code += current
+        #     else:
+        #         optimized += optimize(current_code) + "A"
+        #         current_code = ""
+        # print("optimized:", optimized)
+        # first_robot_all_moves = optimized
+
         #print("second robot:")
         pos2 = "A"
         second_robot_all_moves = ""
-        for c2 in str(first_robot_all_moves):
+        for j in range(len(first_robot_all_moves)):
+            c2 = first_robot_all_moves[j]
+            prev = first_robot_all_moves[j-1] if j > 0 else None
             needed_moves = push_dir_keypad(c2, pos2)
+
             #print(f"From {pos2} to {c2} with {needed_moves}")
             second_robot_all_moves += needed_moves
+            c2_prev = c2
+
             pos2 = c2
         print("second robot:", second_robot_all_moves)
+
+        # optimize before other robot
+        optimized = ""
+        current_code = ""
+        for i in range(len(second_robot_all_moves)):
+            current = second_robot_all_moves[i]
+            if current != "A":
+                current_code += current
+            else:
+                optimized += optimize(current_code) + "A"
+                current_code = ""
+        print("optimized:", optimized)
+        second_robot_all_moves = optimized
 
         #print("third robot:")
         pos3 = "A"
         third_robot_all_moves = ""
-        for c3 in str(second_robot_all_moves):
+        for k in range(len(second_robot_all_moves)):
+            c3 = second_robot_all_moves[k]
+            prev = second_robot_all_moves[k-1] if k > 0 else None
             needed_moves = push_dir_keypad(c3, pos3)
             #print(f"From {pos3} to {c3} with {needed_moves}")
 
@@ -259,9 +385,12 @@ def part1(lines):
         print("third robot:", third_robot_all_moves)
 
         n = get_numeric_part(code)
-        print(f"len = {len(third_robot_all_moves)} * {n} = {len(third_robot_all_moves) * n}")
+        sub_score = len(third_robot_all_moves) * n
+        print(f"len = {len(third_robot_all_moves)} * {n} = {sub_score}")
 
-    return 4
+        score += sub_score
+
+    return score
 
 def part2(lines):
     return 4

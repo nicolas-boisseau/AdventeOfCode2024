@@ -7,7 +7,7 @@ from impl import part1, part2, all_combinations
 class AdventOfCodeTests(unittest.TestCase):
 
     def test_part1_sample(self):
-        self.assertEqual(0, part1(read_input_lines("sample.txt")))
+        self.assertEqual(126384, part1(read_input_lines("sample.txt")))
 
     def test_part1_input(self):
         self.assertEqual(1, part1(read_input_lines("input.txt")))
