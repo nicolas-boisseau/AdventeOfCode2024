@@ -26,21 +26,7 @@ def sort_alphabetically(l):
 
 
 def part1(lines):
-    computers = {}
-    for line in lines:
-        connections = line.split("-")
-        if connections[0] not in computers:
-            c0 = Computer(connections[0])
-            computers[connections[0]] = c0
-        else:
-            c0 = computers[connections[0]]
-        if connections[1] not in computers:
-            c1 = Computer(connections[1])
-            computers[connections[1]] = c1
-        else:
-            c1 = computers[connections[1]]
-
-        c0.connect(c1)
+    computers = extract_computers(lines)
 
     # for c in computers:
     #     print(computers[c])
@@ -63,9 +49,88 @@ def part1(lines):
     return len(output)
 
 
+def extract_computers(lines):
+    computers = {}
+    for line in lines:
+        connections = line.split("-")
+        if connections[0] not in computers:
+            c0 = Computer(connections[0])
+            computers[connections[0]] = c0
+        else:
+            c0 = computers[connections[0]]
+        if connections[1] not in computers:
+            c1 = Computer(connections[1])
+            computers[connections[1]] = c1
+        else:
+            c1 = computers[connections[1]]
+
+        c0.connect(c1)
+    return computers
+
+
+# def height(computer):
+#     remaining = [computer]
+#     visited = set()
+#     while len(remaining) > 0:
+#         current = remaining.pop()
+#         visited.add(current)
+#         for c in current.connected:
+#             if c not in visited:
+#                 connected = 0
+#                 for c2 in c.connected:
+#                     for c3 in c2.connected:
+#                         if c3 in c.connected and c2 in c3.connected:
+#                             connected += 1
+#                 if connected > 2:
+#                     remaining.append(c)
+#     return len(visited)
+
+def dfs(computer):
+    path = []
+    remaining = [computer]
+    visited = set()
+    while len(remaining) > 0:
+        current = remaining.pop(0)
+        if current not in visited:
+            visited.add(current)
+            path.append(current)
+            for c in current.connected:
+                if c not in visited:
+                    remaining.append(c)
+    return path
 
 def part2(lines):
-    return 4
+    computers = extract_computers(lines)
+
+    for c in computers:
+        print(f"dfs({c}) = {len(dfs(computers[c]))}")
+
+    # output = {}
+    # for c in computers:
+    #     output[c] = height(computers[c])
+    #     print(f"height({c}) : {height(computers[c])}")
+
+    # keep only min height
+    # min_height = min(output.values())
+    # final = []
+    # for o in output:
+    #     if output[o] == min_height:
+    #         final += [o]
+
+    #print(output.keys())
+
+
+    # for triplet in output:
+    #     root,left,right = triplet
+    #     root = Node(root)
+    #     root.left = Node(left)
+    #     root.right = Node(right)
+
+
+    # for o in output:
+    #     print(o)
+
+    #return ",".join(sort_alphabetically(final))
 
 
 if __name__ == '__main__':
