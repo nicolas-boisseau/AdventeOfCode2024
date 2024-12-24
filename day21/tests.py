@@ -100,6 +100,19 @@ class AdventOfCodeTests(unittest.TestCase):
         print("translated to robot moves :")
         print(robots_moves)
 
+    def test_combinations(self):
+        combinations = all_combinations("v>")
+        for c in combinations:
+            self.assertTrue(c in [">v", "v>"])
+
+        combinations = all_combinations("v>^")
+        for c in combinations:
+            self.assertTrue(c in [">v^", ">^v", "v>^", "v^>", "^>v", "^v>"])
+
+        combinations = all_combinations("abc")
+        for c in combinations:
+            self.assertTrue(c in ["abc", "acb", "bac", "bca", "cab", "cba"])
+
 
 if __name__ == '__main__':
     unittest.main()

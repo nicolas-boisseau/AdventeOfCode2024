@@ -429,13 +429,15 @@ def optimize(code):
 def get_numeric_part(code):
     return int("".join([c for c in code if c.isdigit()]))
 
-def all_combinations(str):
+def all_combinations(s):
     # "abc" -> ["abc", "acb", "bac", "bca", "cab", "cba"]
-    if len(str) == 1:
-        return [str]
-    if len(str) == 2:
-        return [str, str[::-1]]
-    return [str[0] + s for s in all_combinations(str[1:])] + [str[0] + s for s in all_combinations(str[1:])[::-1]]
+    if len(s) == 0:
+        return [s]
+    if len(s) == 1:
+        return [s]
+    if len(s) == 2:
+        return [s, s[::-1]]
+    return [s[0] + s for s in all_combinations(s[1:])] + [s[0] + s for s in all_combinations(s[1:])[::-1]]
 
 def part1(lines):
     score = 0
@@ -485,12 +487,11 @@ def part1(lines):
         }
     for code in lines[-1:]:
         pos = "A"
-        first_robot_all_moves = ""
+        first_robot_all_moves_possibles = [""]
         numeric_astar = create_numeric_pad_astar_graph()
         for i in range(len(code)):
             current = code[i]
             prev = code[i - 1] if i > 0 else "A"
-
             path = numeric_astar.astar(prev, current)
 
             i = 1
@@ -500,13 +501,19 @@ def part1(lines):
                 robots_moves += numeric_to_robot_moves[f"{buttons[i - 1]},{buttons[i]}"]
                 i += 1
 
-            first_robot_all_moves += robots_moves + "A"
+            to_add = []
+            comb = all_combinations(robots_moves)
+            for c in comb:
+                for m in first_robot_all_moves_possibles:
+                    to_add.append(m + c + "A")
+            first_robot_all_moves_possibles = to_add
+        print("1:", first_robot_all_moves_possibles[0], "but there are", len(first_robot_all_moves_possibles), "possibles")
 
-        print("first robot:", first_robot_all_moves)
+        first_robot_all_moves = first_robot_all_moves_possibles[0]
 
         keypad_astar = create_keypad_astar_graph()
 
-        second_robot_all_moves = ""
+        second_robot_all_moves_possibles = [""]
         for i in range(len(first_robot_all_moves)):
             current = first_robot_all_moves[i]
             prev = first_robot_all_moves[i-1] if i > 0 else "A"
@@ -520,9 +527,17 @@ def part1(lines):
                 robots_moves += to_robot_moves[f"{buttons[i - 1]},{buttons[i]}"]
                 i += 1
 
-            second_robot_all_moves += robots_moves + "A"
+            to_add = []
+            comb = all_combinations(robots_moves)
+            for c in comb:
+                for m in second_robot_all_moves_possibles:
+                    to_add.append(m + c + "A")
+            second_robot_all_moves_possibles = to_add
 
-        print("second robot:", second_robot_all_moves)
+        second_robot_all_moves = second_robot_all_moves_possibles[0]
+
+
+        print("2:", second_robot_all_moves, "but there are", len(second_robot_all_moves_possibles), "possibles")
 
         third_robot_all_moves = ""
         for i in range(len(second_robot_all_moves)):
@@ -540,7 +555,7 @@ def part1(lines):
 
             third_robot_all_moves += robots_moves + "A"
 
-        print("third robot:", third_robot_all_moves)
+        print("3:", third_robot_all_moves)
 
 
         # # optimize before other robot
