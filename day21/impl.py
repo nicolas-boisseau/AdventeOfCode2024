@@ -254,7 +254,7 @@ def push_dir_keypad(target_button, initial_button_pos):
 
     go_to_code = go_to[target_button][initial_button_pos]
 
-    return optimize(go_to_code) + "A"
+    return optimize(go_to_code + "A", initial_button_pos, target_button, True)
 
 # +---+---+---+
 # | 7 | 8 | 9 |
@@ -417,13 +417,13 @@ def push_numeric_keypad(target_button, initial_button_pos):
 
     go_to_code = go_to[target_button][initial_button_pos]
 
-    return optimize(go_to_code + "A")
+    return optimize(go_to_code + "A", initial_button_pos, target_button, False)
 
-def optimize(code):
+def optimize(code, start, end, is_keypad):
     if code == "":
         return code
     combinations = all_combinations(code[:-1])
-    combinations = [c + "A" for c in combinations]
+    combinations = [c + "A" for c in combinations if is_possible_combinaison(c + "A", start, end, is_keypad)]
     costby_comb = {c: cost_to_move_on_keypad(c) for c in combinations}
     return min(costby_comb, key=costby_comb.get)
 
@@ -433,7 +433,47 @@ def get_numeric_part(code):
 def all_combinations(s):
     return [''.join(p) for p in itertools.permutations(s)]
 
+def is_possible_combinaison(comb, start, end, is_keypad):
+    if is_keypad:
+        valid_keypad_moves = {
+            ">": ["v", "A"],
+            "^": ["v", "A"],
+            "v": ["^", ">", "<"],
+            "<": ["v"],
+            "A": ["^", ">"],
+        }
+        current = start
+        i = 0
+        move = comb[i]
+        while current != end and move in valid_keypad_moves[current]:
+            i += 1
+            current = move
+            move = comb[i]
+        return current == end
+    else:
 
+        valid_numeric_moves = {
+            "A": [("^","3"), ("<","0")],
+            "0": [("^","2"), (">", "A")],
+            "1": [(">", "2"), ("^", "4")],
+            "2": [("<","1"), (">","3"), ("^","5"), ("v","0")],
+            "3": [("<","2"), ("^","6"), ("v", "A")],
+            "4": [("v","1"), (">", "5"), ("^","7")],
+            "5": [("v","2"), ("<","4"), (">","6"), ("^","8")],
+            "6": [("v","3"), ("<","5"), ("^","9")],
+            "7": [("v","4"), (">","8")],
+            "8": [("v","5"), ("<","7"), (">","9")],
+            "9": [("v","6"), ("<","8")],
+        }
+        current = start
+        i = 0
+        move = comb[i]
+        while current != end and move in [v[0] for v in valid_numeric_moves[current]]:
+            i += 1
+            next_v = [v for v in valid_numeric_moves[current] if move == v[0]]
+            current = next_v[0][1]
+            move = comb[i]
+        return current == end
 
 def part1(lines):
     score = 0
