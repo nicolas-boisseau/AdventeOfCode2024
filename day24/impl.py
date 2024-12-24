@@ -27,22 +27,27 @@ def part1(lines):
     #print(values)
     #print(wires)
 
-    while all([v_wait in values.keys() for v_wait in values_to_wait]):
+    while not all([v_wait in values.keys() for v_wait in values_to_wait]):
         for w in wires:
-            if w[1] == "AND":
-                if w[0] in values and w[2] in values:
+            if w[0] in values and w[2] in values.keys():
+                if w[1] == "AND":
                     values[w[3]] = values[w[0]] & values[w[2]]
-            elif w[1] == "OR":
-                if w[0] in values and w[2] in values:
+                elif w[1] == "OR":
                     values[w[3]] = values[w[0]] | values[w[2]]
-            elif w[1] == "XOR":
-                if w[0] in values and w[2] in values:
+                elif w[1] == "XOR":
                     values[w[3]] = values[w[0]] ^ values[w[2]]
 
     print("END !")
-    print([values[k] for k in values.keys() if k[0] == "z"])
 
-    return 0
+    z_keys = [k for k in values.keys() if k[0] == "z"]
+
+    z_keys.sort(reverse=True)
+
+    binary = "".join([str(values[k]) for k in z_keys])
+
+    print("binary result = ", binary)
+
+    return int(binary, 2)
 
 def part2(lines):
     return 4
