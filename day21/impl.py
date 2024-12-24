@@ -434,6 +434,7 @@ def all_combinations(s):
     return [''.join(p) for p in itertools.permutations(s)]
 
 
+
 def part1(lines):
     score = 0
     to_robot_moves = {
@@ -448,177 +449,113 @@ def part1(lines):
         "v,<": "<",
         "<,v": ">",
     }
-    numeric_to_robot_moves = {
-            "A,3": "^",
-            "A,0": "<",
-            "0,2": "^",
-            "0,A": ">",
-            "1,2": ">",
-            "1,4": "^",
-            "2,1": "<",
-            "2,5": "^",
-            "2,3": ">",
-            "2,0": "v",
-            "3,2": "<",
-            "3,6": "^",
-            "3,A": "v",
-            "4,1": "v",
-            "4,5": ">",
-            "4,7": "^",
-            "5,2": "v",
-            "5,8": "^",
-            "5,4": "<",
-            "5,6": ">",
-            "6,3": "v",
-            "6,9": "^",
-            "6,5": "<",
-            "7,4": "v",
-            "7,8": ">",
-            "8,5": "v",
-            "8,9": ">",
-            "8,7": "<",
-            "9,6": "v",
-            "9,8": "<"
-        }
     for code in lines:
         pos = "A"
-        first_robot_all_moves_possibles = [""]
-        numeric_astar = create_numeric_pad_astar_graph()
-        for i in range(len(code)):
-            current = code[i]
-            prev = code[i - 1] if i > 0 else "A"
-            path = numeric_astar.astar(prev, current)
+        first_robot_all_moves = ""
+        for c in code:
+            needed_moves = push_numeric_keypad(c, pos)
+            print(f"From {pos} to {c} with {needed_moves}")
+            first_robot_all_moves += needed_moves
+            pos = c
+        print("first robot:", first_robot_all_moves)
+
+        keypad_astar = create_keypad_astar_graph()
+
+        second_robot_all_moves = ""
+        for i in range(len(first_robot_all_moves)):
+            current = first_robot_all_moves[i]
+            prev = first_robot_all_moves[i-1] if i > 0 else "A"
+
+            path = keypad_astar.astar(prev, current)
 
             i = 1
             buttons = [p for p in path]
             robots_moves = ""
             while i < len(buttons):
-                robots_moves += numeric_to_robot_moves[f"{buttons[i - 1]},{buttons[i]}"]
+                robots_moves += to_robot_moves[f"{buttons[i - 1]},{buttons[i]}"]
                 i += 1
 
-            to_add = []
-            comb = all_combinations(robots_moves)
-            for c in comb:
-                for m in first_robot_all_moves_possibles:
-                    to_add.append(m + c + "A")
-            first_robot_all_moves_possibles = to_add
-        #print("1:", first_robot_all_moves_possibles[0], "but there are", len(first_robot_all_moves_possibles), "possibles")
+            second_robot_all_moves += robots_moves + "A"
 
-        sub_score = 99999999999999
+        print("second robot:", second_robot_all_moves)
 
-        #first_robot_all_moves = first_robot_all_moves_possibles[0]
-        for first_robot_all_moves in first_robot_all_moves_possibles:
+        third_robot_all_moves = ""
+        for i in range(len(second_robot_all_moves)):
+            current = second_robot_all_moves[i]
+            prev = second_robot_all_moves[i - 1] if i > 0 else "A"
 
-            keypad_astar = create_keypad_astar_graph()
+            path = keypad_astar.astar(prev, current)
 
-            second_robot_all_moves_possibles = [""]
-            for i in range(len(first_robot_all_moves)):
-                current = first_robot_all_moves[i]
-                prev = first_robot_all_moves[i-1] if i > 0 else "A"
+            i = 1
+            buttons = [p for p in path]
+            robots_moves = ""
+            while i < len(buttons):
+                robots_moves += to_robot_moves[f"{buttons[i - 1]},{buttons[i]}"]
+                i += 1
 
-                path = keypad_astar.astar(prev, current)
+            third_robot_all_moves += robots_moves + "A"
 
-                i = 1
-                buttons = [p for p in path]
-                robots_moves = ""
-                while i < len(buttons):
-                    robots_moves += to_robot_moves[f"{buttons[i - 1]},{buttons[i]}"]
-                    i += 1
-
-                to_add = []
-                comb = all_combinations(robots_moves)
-                for c in comb:
-                    for m in second_robot_all_moves_possibles:
-                        to_add.append(m + c + "A")
-                second_robot_all_moves_possibles = to_add
+        print("third robot:", third_robot_all_moves)
 
 
+        # # optimize before other robot
+        # # optimized = ""
+        # # current_code = ""
+        # # for i in range(len(first_robot_all_moves)):
+        # #     current = first_robot_all_moves[i]
+        # #     if current != "A":
+        # #         current_code += current
+        # #     else:
+        # #         optimized += optimize(current_code) + "A"
+        # #         current_code = ""
+        # # print("optimized:", optimized)
+        # # first_robot_all_moves = optimized
+        #
+        # #print("second robot:")
+        # pos2 = "A"
+        # second_robot_all_moves = ""
+        # for j in range(len(first_robot_all_moves)):
+        #     c2 = first_robot_all_moves[j]
+        #     prev = first_robot_all_moves[j-1] if j > 0 else None
+        #     needed_moves = push_dir_keypad(c2, pos2)
+        #
+        #     #print(f"From {pos2} to {c2} with {needed_moves}")
+        #     second_robot_all_moves += needed_moves
+        #     c2_prev = c2
+        #
+        #     pos2 = c2
+        # print("second robot:", second_robot_all_moves)
+        #
+        # # optimize before other robot
+        # optimized = ""
+        # current_code = ""
+        # for i in range(len(second_robot_all_moves)):
+        #     current = second_robot_all_moves[i]
+        #     if current != "A":
+        #         current_code += current
+        #     else:
+        #         optimized += optimize(current_code) + "A"
+        #         current_code = ""
+        # print("optimized:", optimized)
+        # second_robot_all_moves = optimized
+        #
+        # #print("third robot:")
+        # pos3 = "A"
+        # third_robot_all_moves = ""
+        # for k in range(len(second_robot_all_moves)):
+        #     c3 = second_robot_all_moves[k]
+        #     prev = second_robot_all_moves[k-1] if k > 0 else None
+        #     needed_moves = push_dir_keypad(c3, pos3)
+        #     #print(f"From {pos3} to {c3} with {needed_moves}")
+        #
+        #     third_robot_all_moves += needed_moves
+        #     pos3 = c3
+        # print("third robot:", third_robot_all_moves)
 
-            #print("2:", second_robot_all_moves_possibles[0], "but there are", len(second_robot_all_moves_possibles), "possibles")
+        n = get_numeric_part(code)
+        sub_score = len(third_robot_all_moves) * n
+        print(f"len = {len(third_robot_all_moves)} * {n} = {sub_score}")
 
-            #second_robot_all_moves = second_robot_all_moves_possibles[0]
-            for second_robot_all_moves in second_robot_all_moves_possibles:
-
-                third_robot_all_moves = ""
-                for i in range(len(second_robot_all_moves)):
-                    current = second_robot_all_moves[i]
-                    prev = second_robot_all_moves[i - 1] if i > 0 else "A"
-
-                    path = keypad_astar.astar(prev, current)
-
-                    i = 1
-                    buttons = [p for p in path]
-                    robots_moves = ""
-                    while i < len(buttons):
-                        robots_moves += to_robot_moves[f"{buttons[i - 1]},{buttons[i]}"]
-                        i += 1
-
-                    third_robot_all_moves += robots_moves + "A"
-
-                #print("3:", third_robot_all_moves)
-
-
-                # # optimize before other robot
-                # # optimized = ""
-                # # current_code = ""
-                # # for i in range(len(first_robot_all_moves)):
-                # #     current = first_robot_all_moves[i]
-                # #     if current != "A":
-                # #         current_code += current
-                # #     else:
-                # #         optimized += optimize(current_code) + "A"
-                # #         current_code = ""
-                # # print("optimized:", optimized)
-                # # first_robot_all_moves = optimized
-                #
-                # #print("second robot:")
-                # pos2 = "A"
-                # second_robot_all_moves = ""
-                # for j in range(len(first_robot_all_moves)):
-                #     c2 = first_robot_all_moves[j]
-                #     prev = first_robot_all_moves[j-1] if j > 0 else None
-                #     needed_moves = push_dir_keypad(c2, pos2)
-                #
-                #     #print(f"From {pos2} to {c2} with {needed_moves}")
-                #     second_robot_all_moves += needed_moves
-                #     c2_prev = c2
-                #
-                #     pos2 = c2
-                # print("second robot:", second_robot_all_moves)
-                #
-                # # optimize before other robot
-                # optimized = ""
-                # current_code = ""
-                # for i in range(len(second_robot_all_moves)):
-                #     current = second_robot_all_moves[i]
-                #     if current != "A":
-                #         current_code += current
-                #     else:
-                #         optimized += optimize(current_code) + "A"
-                #         current_code = ""
-                # print("optimized:", optimized)
-                # second_robot_all_moves = optimized
-                #
-                # #print("third robot:")
-                # pos3 = "A"
-                # third_robot_all_moves = ""
-                # for k in range(len(second_robot_all_moves)):
-                #     c3 = second_robot_all_moves[k]
-                #     prev = second_robot_all_moves[k-1] if k > 0 else None
-                #     needed_moves = push_dir_keypad(c3, pos3)
-                #     #print(f"From {pos3} to {c3} with {needed_moves}")
-                #
-                #     third_robot_all_moves += needed_moves
-                #     pos3 = c3
-                # print("third robot:", third_robot_all_moves)
-
-                n = get_numeric_part(code)
-                variante_sub_score = len(third_robot_all_moves) * n
-                #print(f"len = {len(third_robot_all_moves)} * {n} = {sub_score}")
-                if variante_sub_score < sub_score:
-                    sub_score = variante_sub_score
-
-        print(sub_score)
         score += sub_score
 
     return score
