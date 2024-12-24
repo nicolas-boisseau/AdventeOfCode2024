@@ -54,7 +54,92 @@ def cost_to_move_on_keypad(sequence):
 
     return cost
 
-def create_astar_graph():
+def create_numeric_pad_astar_graph():
+
+    to_a = {
+        "3": "v",
+        "0": ">",
+    }
+    to_nine = {
+        "8": ">",
+        "6": "^",
+    }
+    to_eight = {
+        "9": "<",
+        "7": ">",
+        "5": "^",
+    }
+    to_seven = {
+        "8": "<",
+        "4": "^",
+    }
+    to_six = {
+        "9": "v",
+        "5": ">",
+        "3": "^",
+    }
+    to_five = {
+        "8": "v",
+        "6": "<",
+        "4": ">",
+        "2": "^",
+    }
+    to_four = {
+        "7": "v",
+        "5": "<",
+        "1": "^",
+    }
+    to_three = {
+        "A": "^",
+        "6": "v",
+        "2": ">",
+    }
+    to_two = {
+        "5": "v",
+        "3": "<",
+        "1": ">",
+        "0": "^",
+    }
+    to_one = {
+        "4": "v",
+        "2": "<",
+    }
+    to_zero = {
+        "A": "<",
+        "2": "v",
+    }
+    go_to = {
+        "A": to_a,
+        "9": to_nine,
+        "8": to_eight,
+        "7": to_seven,
+        "6": to_six,
+        "5": to_five,
+        "4": to_four,
+        "3": to_three,
+        "2": to_two,
+        "1": to_one,
+        "0": to_zero,
+    }
+
+    nodes = {}
+    for node in ["A", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]:
+        nodes[node] = []
+        for k in go_to[node].keys():
+            nodes[node].append((k, 1))
+
+    return CustomAStar(nodes)
+
+# +---+---+---+
+# | 7 | 8 | 9 |
+# +---+---+---+
+# | 4 | 5 | 6 |
+# +---+---+---+
+# | 1 | 2 | 3 |
+# +---+---+---+
+#     | 0 | A |
+#     +---+---+
+def create_keypad_astar_graph():
     dist_between_symbol = {
         "A": {
             ">": 1,
@@ -366,17 +451,60 @@ def part1(lines):
         "v,<": "<",
         "<,v": ">",
     }
+    numeric_to_robot_moves = {
+            "A,3": "^",
+            "A,0": "<",
+            "0,1": "^",
+            "0,A": ">",
+            "1,2": ">",
+            "1,4": "^",
+            "2,1": "<",
+            "2,5": "^",
+            "2,3": ">",
+            "2,0": "v",
+            "3,2": "<",
+            "3,6": "^",
+            "3,A": "v",
+            "4,1": "v",
+            "4,5": ">",
+            "4,7": "^",
+            "5,2": "v",
+            "5,8": "^",
+            "5,4": "<",
+            "5,6": ">",
+            "6,3": "v",
+            "6,9": "^",
+            "6,5": "<",
+            "7,4": "v",
+            "7,8": ">",
+            "8,5": "v",
+            "8,9": ">",
+            "8,7": "<",
+            "9,6": "v",
+            "9,8": "<"
+        }
     for code in lines[-1:]:
         pos = "A"
         first_robot_all_moves = ""
-        for c in code:
-            needed_moves = push_numeric_keypad(c, pos)
-            print(f"From {pos} to {c} with {needed_moves}")
-            first_robot_all_moves += needed_moves
-            pos = c
+        numeric_astar = create_numeric_pad_astar_graph()
+        for i in range(len(code)):
+            current = code[i]
+            prev = code[i - 1] if i > 0 else "A"
+
+            path = numeric_astar.astar(prev, current)
+
+            i = 1
+            buttons = [p for p in path]
+            robots_moves = ""
+            while i < len(buttons):
+                robots_moves += numeric_to_robot_moves[f"{buttons[i - 1]},{buttons[i]}"]
+                i += 1
+
+            first_robot_all_moves += robots_moves + "A"
+
         print("first robot:", first_robot_all_moves)
 
-        keypad_astar = create_astar_graph()
+        keypad_astar = create_keypad_astar_graph()
 
         second_robot_all_moves = ""
         for i in range(len(first_robot_all_moves)):

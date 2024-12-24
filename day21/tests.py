@@ -1,7 +1,7 @@
 import unittest
 
 from common.common import read_input_lines
-from day21.impl import create_astar_graph
+from day21.impl import create_keypad_astar_graph, create_numeric_pad_astar_graph
 from impl import part1, part2, all_combinations
 
 
@@ -29,7 +29,7 @@ class AdventOfCodeTests(unittest.TestCase):
             self.assertTrue(c in [">v^", ">^v", "v>^", "v^>", "^>v", "^v>"])
 
     def test_astar_graph(self):
-        g = create_astar_graph()
+        g = create_keypad_astar_graph()
         path = g.astar("A", "<")
         to_robot_moves = {
             "A,>": "v",
@@ -50,6 +50,52 @@ class AdventOfCodeTests(unittest.TestCase):
         robots_moves = ""
         while i < len(buttons):
             robots_moves += to_robot_moves[f"{buttons[i-1]},{buttons[i]}"]
+            i += 1
+        print("translated to robot moves :")
+        print(robots_moves)
+
+    def test_numeric_astar_graph(self):
+        g = create_numeric_pad_astar_graph()
+        path = g.astar("A", "8")
+        to_robot_moves = {
+            "A,3": "^",
+            "A,0": "<",
+            "0,1": "^",
+            "0,A": ">",
+            "1,2": ">",
+            "1,4": "^",
+            "2,1": "<",
+            "2,5": "^",
+            "2,3": ">",
+            "2,0": "v",
+            "3,2": "<",
+            "3,6": "^",
+            "3,A": "v",
+            "4,1": "v",
+            "4,5": ">",
+            "4,7": "^",
+            "5,2": "v",
+            "5,8": "^",
+            "5,4": "<",
+            "5,6": ">",
+            "6,3": "v",
+            "6,9": "^",
+            "6,5": "<",
+            "7,4": "v",
+            "7,8": ">",
+            "8,5": "v",
+            "8,9": ">",
+            "8,7": "<",
+            "9,6": "v",
+            "9,8": "<"
+        }
+        # print([p for p in path][1:])
+
+        i = 1
+        buttons = [p for p in path]
+        robots_moves = ""
+        while i < len(buttons):
+            robots_moves += to_robot_moves[f"{buttons[i - 1]},{buttons[i]}"]
             i += 1
         print("translated to robot moves :")
         print(robots_moves)
