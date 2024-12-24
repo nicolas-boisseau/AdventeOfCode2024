@@ -50,7 +50,7 @@ def part1(lines):
     return int(binary, 2)
 
 def part2(lines):
-    return 4
+    return part1(lines)
 
 
 if __name__ == '__main__':
