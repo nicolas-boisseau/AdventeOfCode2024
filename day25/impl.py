@@ -28,7 +28,7 @@ def extract_keys_and_locks(lines):
 
 def read_key_or_lock(current_entry, keys, locks):
     # current entry is done
-    heights = [-1, -1, -1, -1, -1] # sart at -1 to exclude the first "#####"
+    heights = [-1, -1, -1, -1, -1] # start at -1 to exclude the first "#####"
     for cl in current_entry:
         for j in range(len(cl)):
             heights[j] += 1 if cl[j] == "#" else 0
