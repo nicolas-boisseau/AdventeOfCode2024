@@ -490,18 +490,6 @@ def compute_astar(start, end):
 def part1(lines, nb_robots=2):
     sub_part_cache = {}
     score = 0
-    to_robot_moves = {
-        "A,>": "v",
-        "A,^": "<",
-        "^,A": ">",
-        "^,v": "v",
-        ">,A": "^",
-        ">,v": "<",
-        "v,>": ">",
-        "v,^": "^",
-        "v,<": "<",
-        "<,v": ">",
-    }
     for code in lines:
         pos = "A"
         first_robot_all_moves = ""
@@ -517,29 +505,25 @@ def part1(lines, nb_robots=2):
             print(f"robot {r}")
 
             current_moves = ""
-            for i in range(len(previous_moves)):
-                current = previous_moves[i]
-                prev = previous_moves[i - 1] if i > 0 else "A"
+            #for i in range(len(previous_moves)):
+            i = 0
+            while i < len(previous_moves):
+                next_a_index = previous_moves.find("A", i)
+                sliding_windows = previous_moves[i:next_a_index+1] if next_a_index != -1 else previous_moves[i:]
 
-                path = compute_astar(prev, current)
-                #path = keypad_astar.astar(prev, current)
+                current_sliding_window_moves = compute_sliding_window(tuple(sliding_windows))
 
-                j = 1
-                buttons = [p for p in path]
-                robots_moves = ""
-                while j < len(buttons):
-                    robots_moves += to_robot_moves[f"{buttons[j - 1]},{buttons[j]}"]
-                    j += 1
+                current_moves += current_sliding_window_moves
 
-                current_moves += robots_moves + "A"
+                i = next_a_index + 1
 
             sub_part_cache[previous_moves] = current_moves
             previous_moves = current_moves
 
-
-
             n = get_numeric_part(code)
             sub_score = len(previous_moves) * n
+
+            #print(f"robot {r} : {previous_moves}")
             print(f"robot {r} : len = {len(previous_moves)} * {n} = {sub_score}")
 
 
@@ -550,6 +534,40 @@ def part1(lines, nb_robots=2):
         score += sub_score
 
     return score
+
+to_robot_moves = {
+    "A,>": "v",
+    "A,^": "<",
+    "^,A": ">",
+    "^,v": "v",
+    ">,A": "^",
+    ">,v": "<",
+    "v,>": ">",
+    "v,^": "^",
+    "v,<": "<",
+    "<,v": ">",
+}
+
+@lru_cache(maxsize=None)
+def compute_sliding_window(sliding_windows):
+    current_sliding_window_moves = ""
+    for k in range(len(sliding_windows)):
+        current = sliding_windows[k]
+        prev = sliding_windows[k - 1] if k > 0 else "A"
+
+        path = compute_astar(prev, current)
+        # path = keypad_astar.astar(prev, current)
+
+        j = 1
+        buttons = [p for p in path]
+        robots_moves = ""
+        while j < len(buttons):
+            robots_moves += to_robot_moves[f"{buttons[j - 1]},{buttons[j]}"]
+            j += 1
+
+        current_sliding_window_moves += robots_moves + "A"
+    return current_sliding_window_moves
+
 
 def part2(lines):
     return part1(lines, 25-1)
