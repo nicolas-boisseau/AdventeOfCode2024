@@ -70,6 +70,22 @@ def part2(lines):
     # ACT
     run_machine(values, wires)
 
+    # Compute expected z_values
+    expected_z_values = {}
+    for i in range(len(x_keys)):
+        index = str(i).rjust(2, "0")
+        x = values[f"x{index}"]
+        y = values[f"y{index}"]
+        expected_z_values[f"z{index}"] = x & y
+
+    print("EXPECTED VALUES : ")
+    expected_z_keys = [k for k in expected_z_values.keys()]
+    expected_z_keys.sort(reverse=True)
+    binary = "".join([str(expected_z_values[k]) for k in expected_z_keys])
+    print("z values : ", expected_z_values)
+    print("z binary = ", binary)
+
+    print("REAL VALUES : ")
     z_keys = [k for k in values.keys() if k[0] == "z"]
     z_keys.sort(reverse=True)
     binary = "".join([str(values[k]) for k in z_keys])
