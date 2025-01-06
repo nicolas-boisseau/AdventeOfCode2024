@@ -500,40 +500,56 @@ def part1(lines, nb_robots=2):
             pos = c
         print("first robot:", first_robot_all_moves)
 
-        previous_moves = first_robot_all_moves
+        previous_moves_str = first_robot_all_moves
+
+        # convert to sliding windows
+        current_moves = split_in_windows(previous_moves_str)
+
         for r in range(nb_robots):
             print(f"robot {r}")
 
-            current_moves = ""
+            previous_moves = current_moves
+            current_moves = []
             #for i in range(len(previous_moves)):
             i = 0
             while i < len(previous_moves):
-                next_a_index = previous_moves.find("A", i)
-                sliding_windows = previous_moves[i:next_a_index+1] if next_a_index != -1 else previous_moves[i:]
-
-                current_sliding_window_moves = compute_sliding_window(tuple(sliding_windows))
+                current_sliding_window_moves = compute_sliding_window(previous_moves[i])
 
                 current_moves += current_sliding_window_moves
 
-                i = next_a_index + 1
+                i += 1
 
-            sub_part_cache[previous_moves] = current_moves
             previous_moves = current_moves
 
-            n = get_numeric_part(code)
-            sub_score = len(previous_moves) * n
+            #n = get_numeric_part(code)
+            #length = sum([len(m) for m in previous_moves])
+            #sub_score = length * n
 
             #print(f"robot {r} : {previous_moves}")
-            print(f"robot {r} : len = {len(previous_moves)} * {n} = {sub_score}")
+            #print(f"robot {r} : len = {length} * {n} = {sub_score}")
 
 
         n = get_numeric_part(code)
-        sub_score = len(previous_moves) * n
-        print(f"len = {len(previous_moves)} * {n} = {sub_score}")
+        length = sum([len(m) for m in previous_moves])
+        sub_score = length * n
+        print(f"len = {length} * {n} = {sub_score}")
 
         score += sub_score
 
     return score
+
+
+def split_in_windows(previous_moves_str):
+    current_moves = []
+    # for i in range(len(previous_moves)):
+    i = 0
+    while i < len(previous_moves_str):
+        next_a_index = previous_moves_str.find("A", i)
+        sliding_windows = previous_moves_str[i:next_a_index + 1] if next_a_index != -1 else previous_moves_str[i:]
+        current_moves.append(tuple(sliding_windows))
+        i = next_a_index + 1
+    return current_moves
+
 
 to_robot_moves = {
     "A,>": "v",
@@ -550,7 +566,7 @@ to_robot_moves = {
 
 @lru_cache(maxsize=None)
 def compute_sliding_window(sliding_windows):
-    current_sliding_window_moves = ""
+    current_sliding_window_moves = []
     for k in range(len(sliding_windows)):
         current = sliding_windows[k]
         prev = sliding_windows[k - 1] if k > 0 else "A"
@@ -565,7 +581,7 @@ def compute_sliding_window(sliding_windows):
             robots_moves += to_robot_moves[f"{buttons[j - 1]},{buttons[j]}"]
             j += 1
 
-        current_sliding_window_moves += robots_moves + "A"
+        current_sliding_window_moves.append(tuple(robots_moves + "A"))
     return current_sliding_window_moves
 
 
